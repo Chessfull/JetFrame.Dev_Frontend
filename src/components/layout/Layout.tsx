@@ -1,6 +1,5 @@
 import { ReactNode, useEffect, useState } from 'react';
 import Navbar from './Navbar';
-import Footer from './Footer';
 import logoOnly from '../../assets/images/Logo-Only-removebg.png';
 
 interface LayoutProps {
@@ -50,7 +49,7 @@ const Layout = ({ children }: LayoutProps) => {
   }, [cursorVisible]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-dark text-white">
+    <div className="flex flex-col min-h-screen bg-dark text-white overflow-hidden">
       {/* Custom logo cursor */}
       <div 
         className={`custom-cursor ${isHovering ? 'scale-125' : ''} ${cursorVisible ? 'opacity-100' : 'opacity-0'}`}
@@ -71,7 +70,6 @@ const Layout = ({ children }: LayoutProps) => {
       <main className="flex-grow">
         {children}
       </main>
-      <Footer />
     </div>
   );
 };

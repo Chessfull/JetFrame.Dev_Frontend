@@ -6,22 +6,38 @@ const HomePage = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // Parallax effect on scroll
-    const handleScroll = () => {
-      if (heroRef.current) {
-        const scrollY = window.scrollY;
-        heroRef.current.style.transform = `translateY(${scrollY * 0.3}px)`;
+    // Smooth scroll navigation with wheel
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      
+      // Check scroll direction
+      if (e.deltaY > 0) {
+        // Scrolling down - go to second section
+        window.scrollTo({
+          top: window.innerHeight,
+          behavior: 'smooth'
+        });
+      } else {
+        // Scrolling up - go to first section
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
       }
     };
     
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Add event listener with passive: false to allow preventDefault
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+    };
   }, []);
   
   return (
     <div className="relative">
-      {/* Hero Section */}
-      <section className="relative h-screen overflow-hidden flex items-center justify-center">
+      {/* Hero Section - Full height first "page" */}
+      <section className="relative h-screen overflow-hidden flex items-center justify-center snap-start">
         {/* Background gradient with animation */}
         <div className="absolute inset-0 bg-gradient-to-br from-dark to-darkGray z-0">
           <div className="absolute inset-0 opacity-20">
@@ -31,36 +47,55 @@ const HomePage = () => {
         </div>
         
         {/* Hero content */}
-        <div className="container-fluid relative z-10 mt-24 md:mt-28">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div ref={heroRef} className="text-center lg:text-left">
-              <h1 className="text-5xl md:text-6xl font-bold mb-6">
+        <div className="container-fluid relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Left side with logo and text - adjusted positioning */}
+            <div ref={heroRef} className="flex flex-col items-center lg:items-center lg:mt-[-20px] mt-12">
+              {/* Wing logo centered above text */}
+              <div className="relative mb-0 w-48 h-48 md:w-64 md:h-64 flex justify-center mx-auto main-logo animate-wing-spread">
+                <img 
+                  src={logoOnly} 
+                  alt="JetFrame Wings" 
+                  className="w-full h-full opacity-100"
+                />
+              </div>
+              
+              {/* Smaller heading */}
+              <h1 className="text-6xl md:text-7xl font-bold mb-1 relative text-center mt-[-10px]">
                 <span className="text-white">JetFrame</span>
                 <span className="text-primary">.Dev</span>
               </h1>
-              <p className="text-xl md:text-2xl text-gray-300 mb-8 font-mono">Code with wings</p>
-              <p className="text-lg text-gray-400 mb-10 max-w-xl mx-auto lg:mx-0">
-                Generate complete, ready-to-run projects based on your specifications. 
-                Select your tech stack, architecture, and database - and take flight.
+              <p className="text-xl md:text-2xl text-gray-300 mb-12 font-mono text-center">Code with wings</p>
+              <p className="text-lg text-gray-400 mb-10 max-w-md text-center whitespace-pre-line">
+                Generate complete, ready-to-run 
+projects based on your specifications. 
+Select your tech stack, architecture, 
+and database - and take flight.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link to="/generate" className="btn-primary">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/generate" className="btn-primary w-[200px] text-center">
                   Start Generating
                 </Link>
-                <Link to="/documents" className="btn-secondary">
-                  View Documentation
+                <Link to="/documents" className="btn-secondary w-[200px] text-center">
+                  Documentation
                 </Link>
               </div>
             </div>
             
-            <div className="hidden lg:block">
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary bg-opacity-20 rounded-lg filter blur-md"></div>
-                <div className="relative p-4 bg-darkGray rounded-lg border border-gray-700 shadow-lg">
-                  <pre className="text-sm font-mono text-gray-300 overflow-x-auto">
-                    <code>
-{`// JetFrame.Dev - Code Generator
-import { ProjectBuilder } from 'jetframe';
+            {/* Enhanced code editor on the right side - terminal-like style with full height */}
+            <div className="flex items-center justify-center h-full">
+              <div className="w-full h-[650px] mt-4">
+                <div className="relative w-full h-full overflow-hidden">
+                  <div className="bg-[#1e1e1e] rounded-md border border-gray-700 shadow-lg h-full w-full overflow-hidden">
+                    <div className="bg-[#252526] px-4 py-2 border-b border-gray-700 flex items-center">
+                      <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                      <span className="text-gray-400 text-xs">JetFrame.Dev - Code Generator</span>
+                    </div>
+                    <pre className="text-xs font-mono text-gray-300 p-5 h-full overflow-hidden no-scrollbar">
+                      <code className="text-left">
+{`import { ProjectBuilder } from 'jetframe';
 
 const project = new ProjectBuilder()
   .setTechnology('DotNet')
@@ -68,34 +103,45 @@ const project = new ProjectBuilder()
   .setPattern('CQRS')
   .setDatabase('SqlServer')
   .addEntity({
+    name: 'Category',
+    properties: [
+      { name: 'Id', type: 'int', isPrimary: true },
+      { name: 'Name', type: 'string' },
+      { name: 'Description', type: 'string' }
+    ]
+  })
+  .addEntity({
     name: 'Product',
     properties: [
       { name: 'Id', type: 'int', isPrimary: true },
       { name: 'Name', type: 'string' },
-      { name: 'Price', type: 'decimal' }
+      { name: 'Price', type: 'decimal' },
+      { name: 'CategoryId', type: 'int', isForeignKey: true }
+    ],
+    relationships: [
+      {
+        name: 'Category',
+        type: 'ManyToOne',
+        sourceProperty: 'CategoryId',
+        targetEntity: 'Category',
+        targetProperty: 'Id'
+      }
     ]
   })
   .build();
 
 // Your project is ready to deploy!`}
-                    </code>
-                  </pre>
+                      </code>
+                    </pre>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Flying logos in the background */}
-        <div className="absolute bottom-20 left-10 opacity-40">
-          <img 
-            src={logoOnly} 
-            alt="JetFrame Logo" 
-            className="w-24 h-24" 
-            style={{ animation: 'float-plane 8s ease-in-out infinite' }}
-          />
-        </div>
-        <div className="absolute top-40 right-20 opacity-30">
+        {/* Repositioned wing icons - moved higher and more to the right */}
+        <div className="wing-scatter absolute top-24 right-10 opacity-60">
           <img 
             src={logoOnly} 
             alt="JetFrame Logo" 
@@ -103,7 +149,7 @@ const project = new ProjectBuilder()
             style={{ animation: 'float-plane 6s ease-in-out infinite', animationDelay: '1s' }}
           />
         </div>
-        <div className="absolute bottom-40 right-10 opacity-20">
+        <div className="wing-scatter absolute top-16 right-40 opacity-50">
           <img 
             src={logoOnly} 
             alt="JetFrame Logo" 
@@ -111,12 +157,28 @@ const project = new ProjectBuilder()
             style={{ animation: 'float-plane 7s ease-in-out infinite', animationDelay: '2s' }}
           />
         </div>
+        <div className="wing-scatter absolute top-56 right-16 opacity-40">
+          <img 
+            src={logoOnly} 
+            alt="JetFrame Logo" 
+            className="w-14 h-14" 
+            style={{ animation: 'float-plane 8s ease-in-out infinite', animationDelay: '1.5s' }}
+          />
+        </div>
+        
+        {/* Scroll indicator */}
+        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer"
+             onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
       </section>
       
-      {/* Platform Flow Section */}
-      <section className="py-20 bg-darkGray">
+      {/* How It Works Section - Second "page" */}
+      <section className="min-h-screen pt-24 pb-0 bg-darkGray snap-start">
         <div className="container-fluid">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">How It Works</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-20">How It Works</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {steps.map((step, index) => (
@@ -140,8 +202,38 @@ const project = new ProjectBuilder()
               </div>
             ))}
           </div>
+
+          {/* Additional wing in bottom-right corner */}
+          <div className="relative h-24 mt-16">
+            <div className="wing-scatter absolute bottom-0 right-0 opacity-30">
+              <img 
+                src={logoOnly} 
+                alt="JetFrame Logo" 
+                className="w-20 h-20" 
+                style={{ animation: 'float-plane 8s ease-in-out infinite' }}
+              />
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Fixed Footer */}
+      <footer className="py-6 border-t border-gray-800 bg-[#191919]">
+        <div className="container-fluid">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <img src={logoOnly} alt="JetFrame Logo" className="w-6 h-6 mr-2" />
+              <span className="text-lg font-bold">
+                <span className="text-white">JetFrame</span>
+                <span className="text-primary">.Dev</span>
+              </span>
+            </div>
+            <div className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} JetFrame.Dev. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
