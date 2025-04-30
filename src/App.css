@@ -13,3 +13,24 @@ h1 {
 p {
   font-size: 1.2rem;
 }
+
+/* Hide default cursor when using custom cursor */
+html {
+  cursor: none;
+}
+
+/* But ensure cursor works on mobile devices */
+@media (max-width: 768px) {
+  html {
+    cursor: auto;
+  }
+  
+  .custom-cursor {
+    display: none;
+  }
+}
+
+/* Smooth scrolling effect for anchor links */
+html {
+  scroll-behavior: smooth;
+}
