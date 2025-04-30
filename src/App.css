@@ -19,6 +19,52 @@ html {
   cursor: none;
 }
 
+/* Custom cursor styles for logo */
+.custom-cursor {
+  pointer-events: none;
+  position: fixed;
+  z-index: 9999;
+  transform-origin: center;
+  transition: transform 0.15s ease-out;
+}
+
+.custom-cursor img {
+  filter: drop-shadow(0 0 8px rgba(255, 107, 0, 0.6));
+}
+
+/* Custom cursor trail effect */
+.custom-cursor::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 107, 0, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.6;
+  transition: width 0.3s, height 0.3s, opacity 0.3s;
+  z-index: -1;
+  filter: blur(8px);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 0.15;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+}
+
 /* But ensure cursor works on mobile devices */
 @media (max-width: 768px) {
   html {

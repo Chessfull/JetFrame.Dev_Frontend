@@ -20,18 +20,23 @@
   }
   
   .btn-primary {
-    @apply px-6 py-2 bg-primary text-white rounded-md transition-all hover:bg-opacity-90 hover:shadow-glow;
+    @apply px-6 py-2 bg-primary text-white rounded-md transition-all hover:bg-opacity-90 hover:shadow-glow transform hover:scale-105;
   }
 
   .btn-secondary {
     @apply px-6 py-2 bg-transparent border border-primary text-primary rounded-md transition-all 
-           hover:bg-primary hover:bg-opacity-10 hover:shadow-glow;
+           hover:bg-primary hover:bg-opacity-10 hover:shadow-glow transform hover:scale-105;
   }
 
-  .custom-cursor {
-    @apply fixed w-8 h-8 rounded-full bg-primary bg-opacity-60 pointer-events-none z-50 
-           flex items-center justify-center transition-transform duration-200 ease-out;
-    transform: translate(-50%, -50%);
-    mix-blend-mode: difference;
+  /* Card hover effect */
+  .hover-card {
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-glow;
   }
+}
+
+/* Custom animations */
+@keyframes float-plane {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-6px) rotate(-2deg); }
+  75% { transform: translateY(6px) rotate(2deg); }
 }
