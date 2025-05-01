@@ -995,24 +995,38 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
               <h3 className="text-xl font-bold mb-4">Database</h3>
               <div className="space-y-3">
                 {projectConfig.technology ? (
-                  availableDatabases.map((db) => (
-                    <div 
-                      key={db.id}
-                      className={`p-4 border rounded-md cursor-pointer transition-all hover:shadow-lg hover:translate-y-[-2px] ${
-                        projectConfig.database === db.name 
-                          ? 'border-primary bg-primary bg-opacity-10' 
-                          : 'border-gray-700 hover:border-gray-500'
-                      }`}
-                      onClick={() => setProjectConfig(prev => ({ ...prev, database: db.name }))}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span>{db.name}</span>
-                        {projectConfig.database === db.name && (
-                          <span className="text-green-500 ml-2">✓</span>
-                        )}
-                      </div>
-                    </div>
-                  ))
+                  // Manually sort to put SqlServer first and add console log for database names
+                  [...availableDatabases]
+                    .sort((a, b) => {
+                      // Put SqlServer first
+                      if (a.name === 'SqlServer') return -1;
+                      if (b.name === 'SqlServer') return 1;
+                      // Then sort alphabetically
+                      return a.name.localeCompare(b.name);
+                    })
+                    .map((db) => {
+                      // Log database names to see the exact format
+                      console.log(`Available database option: "${db.name}"`);
+                      
+                      return (
+                        <div 
+                          key={db.id}
+                          className={`p-4 border rounded-md cursor-pointer transition-all hover:shadow-lg hover:translate-y-[-2px] ${
+                            projectConfig.database === db.name 
+                              ? 'border-primary bg-primary bg-opacity-10' 
+                              : 'border-gray-700 hover:border-gray-500'
+                          }`}
+                          onClick={() => handleDatabaseSelection(db.name)}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span>{db.name}</span>
+                            {projectConfig.database === db.name && (
+                              <span className="text-green-500 ml-2">✓</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
                 ) : (
                   <div className="text-gray-500 italic">Please go back and select a technology first</div>
                 )}
@@ -1102,7 +1116,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
                 
                 <button 
                   className="btn-primary w-full py-3 transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2"
-                  disabled={isLoading || !projectConfig.technology || !projectConfig.database}
                   onClick={handleGenerateProject}
                 >
                   <WingIcon />
@@ -1241,21 +1254,242 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
     };
   };
 
-  // Update the handleGenerateProject function that was causing a linter error
+  // Add a function to get default connection string based on selected database
+  const getDefaultConnectionString = (dbName: string, projectName: string = 'mydb'): string => {
+    // Sanitize project name for use in connection string (remove spaces, special chars)
+    const sanitizedName = projectName ? projectName.replace(/[^a-zA-Z0-9]/g, '') : 'mydb';
+    
+    let connectionString = '';
+    
+    switch (dbName) {
+      case 'PostgreSQL':
+        connectionString = `Host=localhost;Port=5432;Database=${sanitizedName};Username=postgres;Password=password;`;
+        break;
+      case 'MySQL':
+        connectionString = `Server=localhost;Port=3306;Database=${sanitizedName};Uid=root;Pwd=password;`;
+        break;
+      case 'SqlServer':
+        connectionString = `Server=localhost;Database=${sanitizedName};User Id=sa;Password=password;TrustServerCertificate=True;`;
+        break;
+      case 'MongoDB':
+        connectionString = `mongodb://localhost:27017/${sanitizedName}`;
+        break;
+      case 'Oracle':
+        connectionString = `Data Source=localhost:1521/ORCLPDB1;User Id=system;Password=password;`;
+        break;
+      case 'SQLite':
+        connectionString = `Data Source=${sanitizedName}.db;Version=3;`;
+        break;
+      default:
+        connectionString = '';
+    }
+    
+    console.log(`Generated connection string for ${dbName}:`, connectionString);
+    return connectionString;
+  };
+
+  // Add effect to set default connection string when database is selected or project name changes
+  useEffect(() => {
+    // Initialize the connection string based on the selected database
+    if (projectConfig.database) {
+      const defaultConnectionString = getDefaultConnectionString(
+        projectConfig.database, 
+        projectConfig.projectName || 'mydb'
+      );
+      
+      console.log(`Setting connection string for ${projectConfig.database}:`, defaultConnectionString);
+      
+      // Force the connection string update
+      setProjectConfig(prev => ({
+        ...prev,
+        connectionString: defaultConnectionString
+      }));
+    }
+  }, [projectConfig.database]);
+
+  // Update connection string when project name changes
+  useEffect(() => {
+    if (projectConfig.database && projectConfig.projectName) {
+      // Only update if it seems like we're using the default pattern (contains localhost)
+      if (projectConfig.connectionString.includes('localhost')) {
+        const updatedConnectionString = getDefaultConnectionString(
+          projectConfig.database, 
+          projectConfig.projectName
+        );
+        
+        console.log(`Updating connection string for project name change:`, updatedConnectionString);
+        
+        setProjectConfig(prev => ({
+          ...prev,
+          connectionString: updatedConnectionString
+        }));
+      }
+    }
+  }, [projectConfig.projectName]);
+
+  // Define a wing icon component for the Generate Project button
+  const WingIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-50">
+      <path d="M12 4C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 11.5C21.27 7.11 17 4 12 4ZM12 16.5C9.24 16.5 7 14.26 7 11.5C7 8.74 9.24 6.5 12 6.5C14.76 6.5 17 8.74 17 11.5C17 14.26 14.76 16.5 12 16.5ZM12 8.5C10.34 8.5 9 9.84 9 11.5C9 13.16 10.34 14.5 12 14.5C13.66 14.5 15 13.16 15 11.5C15 9.84 13.66 8.5 12 8.5Z" fill="currentColor"/>
+    </svg>
+  );
+
+  // Add state for generation status modal
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
+  const [generationMessage, setGenerationMessage] = useState('');
+  const [downloadUrl, setDownloadUrl] = useState('');
+
+  // Replace toast notification with centered notification
+  const [notification, setNotification] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error' | 'warning' | 'info';
+  }>({
+    show: false,
+    message: '',
+    type: 'info'
+  });
+
+  // Show notification helper function
+  const showNotification = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    setNotification({
+      show: true,
+      message,
+      type
+    });
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      setNotification(prev => ({ ...prev, show: false }));
+    }, 5000);
+  };
+
+  // Add a central Notification component
+  const Notification = () => {
+    if (!notification.show) return null;
+    
+    const bgColors = {
+      success: 'bg-green-500',
+      error: 'bg-red-500',
+      warning: 'bg-yellow-500',
+      info: 'bg-blue-500'
+    };
+    
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className={`${bgColors[notification.type]} text-white px-8 py-6 rounded-lg shadow-xl max-w-md mx-4 relative`}>
+          <div className="flex items-start">
+            <div className="flex-1">
+              <p className="text-lg font-medium whitespace-pre-line">{notification.message}</p>
+            </div>
+            <button 
+              onClick={() => setNotification(prev => ({ ...prev, show: false }))}
+              className="ml-4 text-white hover:text-gray-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Update handleGenerateProject to include validation
   const handleGenerateProject = async () => {
-    if (!projectConfig.technology || !projectConfig.database) {
+    // Collect all validation errors
+    const errors = [];
+    
+    if (!projectConfig.technology) {
+      errors.push("Please select a technology");
+    }
+    
+    if (!projectConfig.database) {
+      errors.push("Please select a database");
+    }
+    
+    if (!projectConfig.projectName || projectConfig.projectName.trim() === '') {
+      errors.push("Please enter a project name");
+    }
+    
+    // If there are validation errors, show them
+    if (errors.length > 0) {
+      // Join all errors with line breaks
+      const errorMessage = errors.map(e => `• ${e}`).join('\n');
+      showNotification(errorMessage, "error");
       return;
     }
+    
+    // If description is empty, set default
+    if (!projectConfig.projectDescription || projectConfig.projectDescription.trim() === '') {
+      setProjectConfig(prev => ({ ...prev, projectDescription: 'Description' }));
+    }
 
+    // Reset status
+    setGenerationStatus('generating');
+    setGenerationMessage('Initializing project generation...');
+    setShowStatusModal(true);
     setIsLoading(true);
+    
     try {
-      // Prepare entities data from our state
-      const entitiesData = entities.map(entity => ({
-        name: entity.name,
-        columns: entity.columns,
-        relationships: entity.relationships
-      }));
+      // Map our entity structure to the API expected format
+      const apiEntities = entities.map(entity => {
+        // Map columns to properties
+        const properties = entity.columns.map(column => ({
+          name: column.name,
+          type: column.type,
+          isPrimaryKey: column.isPrimaryKey,
+          isRequired: column.isRequired
+        }));
+        
+        // Map relationships
+        const relationships = entity.relationships.map(rel => {
+          const targetEntity = entities.find(e => e.id === rel.toEntity);
+          if (!targetEntity) return null;
+          
+          // Map relationship types to API format (CamelCase instead of kebab-case)
+          let mappedType = '';
+          switch (rel.type) {
+            case 'one-to-many': mappedType = 'OneToMany'; break;
+            case 'many-to-one': mappedType = 'ManyToOne'; break;
+            case 'many-to-many': mappedType = 'ManyToMany'; break;
+            case 'one-to-one': mappedType = 'OneToOne'; break;
+            default: mappedType = 'OneToMany';
+          }
+          
+          // Find foreign key if it's a ManyToOne relationship
+          let foreignKeyProperty = undefined;
+          if (mappedType === 'ManyToOne') {
+            // Look for a column that might be a foreign key to this relation
+            const possibleFkColumn = entity.columns.find(col => 
+              col.isForeignKey && col.referencedEntity === targetEntity.id
+            );
+            
+            if (possibleFkColumn) {
+              foreignKeyProperty = possibleFkColumn.name;
+            }
+          }
+          
+          return {
+            targetEntity: targetEntity.name,
+            type: mappedType,
+            ...(foreignKeyProperty && { foreignKeyProperty })
+          };
+        }).filter(Boolean); // Remove null entries
+        
+        return {
+          name: entity.name,
+          properties,
+          relationships
+        };
+      });
       
+      // Update status
+      setGenerationMessage('Sending project configuration to server...');
+      
+      // Send to API
       const response = await apiService.generateProject({
         projectName: projectConfig.projectName,
         projectDescription: projectConfig.projectDescription,
@@ -1264,33 +1498,58 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
         designPattern: projectConfig.designPattern,
         database: projectConfig.database,
         connectionString: projectConfig.connectionString,
-        entities: entitiesData
+        entities: apiEntities
       });
       
       // Check for successful response
       if (response.id) {
+        setGenerationMessage('Project generation in progress. This may take a few minutes...');
+        
         // Start a timer to check project generation status
         const checkStatusInterval = setInterval(async () => {
-          const statusResponse = await apiService.getProjectStatus(response.id);
-          
-          if (statusResponse.status === 'Completed') {
-            clearInterval(checkStatusInterval);
-            setIsLoading(false);
+          try {
+            const statusResponse = await apiService.getProjectStatus(response.id);
             
-            // Open project download link
-            window.open(apiService.downloadProject(response.id), '_blank');
-          } else if (statusResponse.status === 'Failed') {
+            // Update progress percentage if available
+            if (statusResponse.progress) {
+              setGenerationMessage(`Generating project: ${statusResponse.progress}% complete`);
+            }
+            
+            if (statusResponse.status === 'Completed') {
+              clearInterval(checkStatusInterval);
+              setIsLoading(false);
+              
+              // Set success state
+              setGenerationStatus('success');
+              setGenerationMessage('Project generated successfully!');
+              
+              // Set download URL
+              const downloadUrl = apiService.downloadProject(response.id);
+              setDownloadUrl(downloadUrl);
+              
+              // Don't automatically open download - let user click the button in modal
+            } else if (statusResponse.status === 'Failed') {
+              clearInterval(checkStatusInterval);
+              setIsLoading(false);
+              
+              // Set error state
+              setGenerationStatus('error');
+              setGenerationMessage(statusResponse.error || 'Project generation failed. Please try again.');
+            }
+            // Wait for 'Queued' or 'InProgress' status
+          } catch (error) {
             clearInterval(checkStatusInterval);
             setIsLoading(false);
-            alert('Project generation failed. Please try again.');
+            setGenerationStatus('error');
+            setGenerationMessage('Error checking generation status. Please try again.');
           }
-          // Wait for 'Queued' or 'InProgress' status
         }, 2000); // Check every 2 seconds
       }
     } catch (error) {
       console.error('Error generating project:', error);
       setIsLoading(false);
-      alert('An error occurred while generating the project. Please try again.');
+      setGenerationStatus('error');
+      setGenerationMessage('An error occurred while generating the project. Please try again.');
     }
   };
 
@@ -1749,40 +2008,176 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
     return allRelationships;
   };
 
-  // Add a function to get default connection string based on selected database
-  const getDefaultConnectionString = (dbName: string): string => {
-    switch (dbName) {
-      case 'PostgreSQL':
-        return 'Host=localhost;Port=5432;Database=mydb;Username=postgres;Password=password;';
-      case 'MySQL':
-        return 'Server=localhost;Port=3306;Database=mydb;Uid=root;Pwd=password;';
-      case 'SqlServer':
-        return 'Server=localhost;Database=mydb;User Id=sa;Password=password;TrustServerCertificate=True;';
-      case 'MongoDB':
-        return 'mongodb://localhost:27017/mydb';
-      case 'Oracle':
-        return 'Data Source=localhost:1521/ORCLPDB1;User Id=system;Password=password;';
-      case 'SQLite':
-        return 'Data Source=mydb.db;Version=3;';
-      default:
-        return '';
-    }
+  // Update StatusModal component for UI improvements
+  const StatusModal = () => {
+    if (!showStatusModal) return null;
+    
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className={`${isDarkTheme ? 'bg-dark' : 'bg-white'} rounded-lg border ${isDarkTheme ? 'border-gray-800' : 'border-gray-300'} p-8 w-full max-w-md`}>
+          <div className="text-center">
+            {/* Different content based on status */}
+            {generationStatus === 'generating' && (
+              <>
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+                <h3 className="text-xl font-bold mb-2">Generating Project</h3>
+                <p className="text-gray-400 mb-4">{generationMessage}</p>
+                {/* Removed the orange progress bar */}
+                <button
+                  onClick={() => setShowStatusModal(false)}
+                  className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md"
+                >
+                  Hide (Continue in Background)
+                </button>
+              </>
+            )}
+            
+            {generationStatus === 'success' && (
+              <>
+                <div className="bg-green-900 bg-opacity-20 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Success!</h3>
+                <p className="text-gray-400 mb-6">{generationMessage}</p>
+                <div className="flex justify-center space-x-3">
+                  <a
+                    href={downloadUrl}
+                    download
+                    className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md w-32 flex items-center justify-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Project
+                  </a>
+                  <button
+                    onClick={() => setShowStatusModal(false)}
+                    className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md w-32"
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            )}
+            
+            {generationStatus === 'error' && (
+              <>
+                <div className="bg-red-900 bg-opacity-20 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Error</h3>
+                <p className="text-gray-400 mb-6">{generationMessage}</p>
+                <div className="flex justify-center space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowStatusModal(false);
+                      setGenerationStatus('idle');
+                    }}
+                    className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md w-32"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => {
+                      setGenerationStatus('idle');
+                      handleGenerateProject();
+                    }}
+                    className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md w-32"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
-  // Add effect to set default connection string when database is selected
-  useEffect(() => {
-    if (projectConfig.database && !projectConfig.connectionString) {
-      const defaultConnectionString = getDefaultConnectionString(projectConfig.database);
-      setProjectConfig(prev => ({ ...prev, connectionString: defaultConnectionString }));
+  // Completely rewrite the database selection handler to fix the connection string issue
+  const handleDatabaseSelection = (dbName: string) => {
+    console.log(`Setting database to: "${dbName}"`);
+    
+    // Generate appropriate connection string based on exact database name
+    let connectionString = '';
+    const projectNameForDb = projectConfig.projectName || 'mydb';
+    
+    // Check the exact database name from the UI
+    if (dbName === 'SqlServer') {
+      connectionString = `Server=localhost;Database=${projectNameForDb};User Id=sa;Password=password;TrustServerCertificate=True;`;
+    } 
+    else if (dbName === 'MySQL') {
+      connectionString = `Server=localhost;Port=3306;Database=${projectNameForDb};Uid=root;Pwd=password;`;
+    } 
+    else if (dbName === 'PostgreSQL') {
+      connectionString = `Host=localhost;Port=5432;Database=${projectNameForDb};Username=postgres;Password=password;`;
     }
-  }, [projectConfig.database]);
+    else {
+      // Fallback for any other database
+      connectionString = `Server=localhost;Database=${projectNameForDb};`;
+    }
+    
+    console.log(`Generated connection string: "${connectionString}"`);
+    
+    // Set state with the new connection string - use function form to ensure we get the latest state
+    setProjectConfig(prev => {
+      const newState = {
+        ...prev,
+        database: dbName,
+        connectionString: connectionString
+      };
+      
+      console.log("New project config:", newState);
+      return newState;
+    });
+    
+    // Force the connection string to update in the UI by setting it directly
+    setTimeout(() => {
+      const connectionInput = document.querySelector('input[placeholder="Enter your database connection string"]') as HTMLInputElement;
+      if (connectionInput) {
+        connectionInput.value = connectionString;
+        console.log("Set connection string in input field directly");
+      }
+    }, 100);
+  };
 
-  // Define a wing icon component for the Generate Project button
-  const WingIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-50">
-      <path d="M12 4C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 11.5C21.27 7.11 17 4 12 4ZM12 16.5C9.24 16.5 7 14.26 7 11.5C7 8.74 9.24 6.5 12 6.5C14.76 6.5 17 8.74 17 11.5C17 14.26 14.76 16.5 12 16.5ZM12 8.5C10.34 8.5 9 9.84 9 11.5C9 13.16 10.34 14.5 12 14.5C13.66 14.5 15 13.16 15 11.5C15 9.84 13.66 8.5 12 8.5Z" fill="currentColor"/>
-    </svg>
-  );
+  // Update useEffect to also handle connection string properly
+  useEffect(() => {
+    if (projectConfig.database && projectConfig.projectName) {
+      // Generate a new connection string based on current database and new project name
+      let connectionString = '';
+      
+      // Make sure database names match exactly
+      switch (projectConfig.database) {
+        case 'MySQL':
+          connectionString = `Server=localhost;Port=3306;Database=${projectConfig.projectName};Uid=root;Pwd=password;`;
+          break;
+        case 'PostgreSQL':
+          connectionString = `Host=localhost;Port=5432;Database=${projectConfig.projectName};Username=postgres;Password=password;`;
+          break;
+        case 'SqlServer':
+          connectionString = `Server=localhost;Database=${projectConfig.projectName};User Id=sa;Password=password;TrustServerCertificate=True;`;
+          break;
+        default:
+          connectionString = `Server=localhost;Database=${projectConfig.projectName};`;
+      }
+      
+      console.log(`Project name changed, updating connection string: ${connectionString}`);
+      
+      // Only update if we're using the default pattern (contains localhost)
+      if (projectConfig.connectionString.includes('localhost')) {
+        setProjectConfig(prev => ({
+          ...prev,
+          connectionString: connectionString
+        }));
+      }
+    }
+  }, [projectConfig.projectName, projectConfig.database]);
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDarkTheme ? 'bg-darkGray text-white' : 'bg-gray-100 text-gray-800'}`}>
@@ -2294,6 +2689,12 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
           </div>
         </div>
       )}
+      
+      {/* Status Modal */}
+      <StatusModal />
+      
+      {/* Centered Notification */}
+      <Notification />
     </div>
   );
 };
