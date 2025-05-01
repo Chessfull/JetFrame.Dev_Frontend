@@ -194,7 +194,7 @@ const GeneratePage = () => {
       case 'technology':
         return Boolean(projectConfig.technology && projectConfig.architecture && projectConfig.designPattern);
       case 'entity':
-        return true; // For now, entity tab is always considered complete
+        return entities.length > 0; // Changed to require at least one entity
       case 'database':
         return Boolean(projectConfig.database && projectConfig.connectionString && projectConfig.projectName);
       default:
@@ -218,7 +218,14 @@ const GeneratePage = () => {
 
   // Handle tab navigation with animation and validation
   const goToNextTab = () => {
-    if (!isTabComplete(activeTab)) return;
+    if (!isTabComplete(activeTab)) {
+      // Show error message if trying to navigate without completing requirements
+      if (activeTab === 'entity' && entities.length === 0) {
+        alert("Please add at least one entity before proceeding to the database configuration.");
+        return;
+      }
+      return;
+    }
 
     setAnimateContent(true);
     setTimeout(() => {
@@ -1012,59 +1019,41 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
               </div>
               
               {projectConfig.database && (
-                <div className="mt-6 p-4 bg-gray-800 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-400 mb-2">Database Schema Preview</h4>
-                  <div className="p-3 border border-gray-700 rounded-lg">
-                    {selectedEntityTemplate && (
-                      <div className="flex items-center justify-center">
-                        <div className="w-32 p-2 border border-primary border-opacity-50 rounded bg-primary bg-opacity-10 text-center">
-                          <div className="font-medium">{selectedEntityTemplate}</div>
-                          <div className="mt-1 border-t border-gray-700 pt-1 text-xs text-gray-400">
-                            {entityTemplates.find(t => t.name === selectedEntityTemplate)?.properties.slice(0, 2).map((prop: any, i) => (
-                              <div key={i} className="text-xs">{prop.name}</div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                <div className="mt-6">
+                  <h3 className="text-lg font-bold mb-2">Connection String <span className="text-xs text-gray-500 font-normal">(optional)</span></h3>
+                  <input
+                    type="text"
+                    className="w-full p-3 bg-[#1e1e1e] border border-gray-700 rounded-md focus:border-primary focus:ring-1 focus:ring-primary custom-scrollbar"
+                    placeholder="Enter your database connection string"
+                    value={projectConfig.connectionString}
+                    onChange={(e) => setProjectConfig(prev => ({ ...prev, connectionString: e.target.value }))}
+                  />
                 </div>
               )}
             </div>
 
             <div className="bg-dark rounded-lg border border-gray-800 p-6 col-span-2">
-              <h3 className="text-xl font-bold mb-4">Connection String</h3>
-              <input
-                type="text"
-                className="w-full p-3 bg-[#1e1e1e] border border-gray-700 rounded-md focus:border-primary focus:ring-1 focus:ring-primary custom-scrollbar"
-                placeholder="Enter your database connection string"
-                value={projectConfig.connectionString}
-                onChange={(e) => setProjectConfig(prev => ({ ...prev, connectionString: e.target.value }))}
-              />
-              
-              <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4">Project Details</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">Project Name</label>
-                    <input
-                      type="text"
-                      className="w-full p-3 bg-[#1e1e1e] border border-gray-700 rounded-md focus:border-primary focus:ring-1 focus:ring-primary"
-                      placeholder="e.g., EcommerceApp"
-                      value={projectConfig.projectName}
-                      onChange={(e) => setProjectConfig(prev => ({ ...prev, projectName: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">Project Description</label>
-                    <textarea
-                      className="w-full p-3 bg-[#1e1e1e] border border-gray-700 rounded-md focus:border-primary focus:ring-1 focus:ring-primary custom-scrollbar"
-                      placeholder="Brief description of your project"
-                      rows={3}
-                      value={projectConfig.projectDescription}
-                      onChange={(e) => setProjectConfig(prev => ({ ...prev, projectDescription: e.target.value }))}
-                    />
-                  </div>
+              <h3 className="text-xl font-bold mb-4">Project Details</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Project Name</label>
+                  <input
+                    type="text"
+                    className="w-full p-3 bg-[#1e1e1e] border border-gray-700 rounded-md focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="e.g., EcommerceApp"
+                    value={projectConfig.projectName}
+                    onChange={(e) => setProjectConfig(prev => ({ ...prev, projectName: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Project Description <span className="text-xs text-gray-500 font-normal">(optional)</span></label>
+                  <textarea
+                    className="w-full p-3 bg-[#1e1e1e] border border-gray-700 rounded-md focus:border-primary focus:ring-1 focus:ring-primary custom-scrollbar"
+                    placeholder="Brief description of your project"
+                    rows={3}
+                    value={projectConfig.projectDescription}
+                    onChange={(e) => setProjectConfig(prev => ({ ...prev, projectDescription: e.target.value }))}
+                  />
                 </div>
               </div>
               
@@ -1089,20 +1078,35 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
                         <div className="text-sm text-gray-400">Database</div>
                         <div className="font-medium">{projectConfig.database || '-'}</div>
                       </div>
-                      <div>
+                      <div className="relative group">
                         <div className="text-sm text-gray-400">Entities</div>
-                        <div className="font-medium">{selectedEntityTemplate ? '1' : '0'}</div>
+                        <div className="font-medium">{entities.length}</div>
+                        
+                        {/* Entity names hover panel */}
+                        {entities.length > 0 && (
+                          <div className="absolute left-0 invisible group-hover:visible bg-black bg-opacity-80 text-white text-xs rounded p-2 -bottom-[calc(2rem+8px*min(10,entities.length))] z-10 w-48">
+                            <div className="font-bold mb-1">Entity List:</div>
+                            <div className="max-h-40 overflow-y-auto">
+                              {entities.map((entity, index) => (
+                                <div key={index} className="py-1 border-b border-gray-700 last:border-b-0">
+                                  {entity.name}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
                 
                 <button 
-                  className="btn-primary w-full py-3 transition-all duration-300 hover:scale-105"
+                  className="btn-primary w-full py-3 transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2"
                   disabled={isLoading || !projectConfig.technology || !projectConfig.database}
                   onClick={handleGenerateProject}
                 >
-                  {isLoading ? 'Generating Project...' : 'Generate Project'}
+                  <WingIcon />
+                  <span>{isLoading ? 'Generating Project...' : 'Generate Project'}</span>
                 </button>
               </div>
             </div>
@@ -1744,6 +1748,41 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
     
     return allRelationships;
   };
+
+  // Add a function to get default connection string based on selected database
+  const getDefaultConnectionString = (dbName: string): string => {
+    switch (dbName) {
+      case 'PostgreSQL':
+        return 'Host=localhost;Port=5432;Database=mydb;Username=postgres;Password=password;';
+      case 'MySQL':
+        return 'Server=localhost;Port=3306;Database=mydb;Uid=root;Pwd=password;';
+      case 'SqlServer':
+        return 'Server=localhost;Database=mydb;User Id=sa;Password=password;TrustServerCertificate=True;';
+      case 'MongoDB':
+        return 'mongodb://localhost:27017/mydb';
+      case 'Oracle':
+        return 'Data Source=localhost:1521/ORCLPDB1;User Id=system;Password=password;';
+      case 'SQLite':
+        return 'Data Source=mydb.db;Version=3;';
+      default:
+        return '';
+    }
+  };
+
+  // Add effect to set default connection string when database is selected
+  useEffect(() => {
+    if (projectConfig.database && !projectConfig.connectionString) {
+      const defaultConnectionString = getDefaultConnectionString(projectConfig.database);
+      setProjectConfig(prev => ({ ...prev, connectionString: defaultConnectionString }));
+    }
+  }, [projectConfig.database]);
+
+  // Define a wing icon component for the Generate Project button
+  const WingIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-50">
+      <path d="M12 4C7 4 2.73 7.11 1 11.5C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 11.5C21.27 7.11 17 4 12 4ZM12 16.5C9.24 16.5 7 14.26 7 11.5C7 8.74 9.24 6.5 12 6.5C14.76 6.5 17 8.74 17 11.5C17 14.26 14.76 16.5 12 16.5ZM12 8.5C10.34 8.5 9 9.84 9 11.5C9 13.16 10.34 14.5 12 14.5C13.66 14.5 15 13.16 15 11.5C15 9.84 13.66 8.5 12 8.5Z" fill="currentColor"/>
+    </svg>
+  );
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDarkTheme ? 'bg-darkGray text-white' : 'bg-gray-100 text-gray-800'}`}>
