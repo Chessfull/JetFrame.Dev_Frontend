@@ -32,6 +32,39 @@
   .hover-card {
     @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-glow;
   }
+  
+  /* Custom scrollbar styles */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 140, 0, 0.5) rgba(30, 30, 30, 0.3);
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(30, 30, 30, 0.3);
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 140, 0, 0.5);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 140, 0, 0.8);
+  }
+  
+  /* Diagram container */
+  .diagram-container {
+    @apply overflow-y-auto overflow-x-hidden h-full relative;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 140, 0, 0.5) rgba(30, 30, 30, 0.3);
+  }
 }
 
 /* Custom animations */

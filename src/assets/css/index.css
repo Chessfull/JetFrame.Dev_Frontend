@@ -1,7 +1,7 @@
 .btn-primary {
   @apply bg-primary hover:bg-primary-dark text-white font-semibold py-2 px-6 rounded-md transition-colors;
 }
-
+ 
 .btn-secondary {
   @apply bg-dark hover:bg-primary hover:bg-opacity-10 text-white font-semibold py-2 px-6 rounded-md border border-primary transition-colors hover:text-primary;
 } 
