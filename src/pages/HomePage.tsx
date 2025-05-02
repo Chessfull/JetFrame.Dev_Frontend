@@ -1,9 +1,22 @@
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import logoOnly from '../assets/images/Logo-Only-removebg.png';
 
 const HomePage = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
+  // Protected route navigation
+  const handleGenerateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else {
+      navigate('/generate');
+    }
+  };
   
   useEffect(() => {
     // Smooth scroll navigation with wheel
@@ -73,9 +86,9 @@ Select your tech stack, architecture,
 and database - and take flight.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/generate" className="btn-primary w-[200px] text-center">
+                <button onClick={handleGenerateClick} className="btn-primary w-[200px] text-center">
                   Start Generating
-                </Link>
+                </button>
                 <Link to="/documents" className="btn-secondary w-[200px] text-center">
                   Documentation
                 </Link>
@@ -176,64 +189,59 @@ const project = new ProjectBuilder()
       </section>
       
       {/* How It Works Section - Second "page" */}
-      <section className="min-h-screen pt-24 pb-0 bg-darkGray snap-start">
-        <div className="container-fluid">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-20">How It Works</h2>
+      <section className="bg-darkGray snap-start py-24">
+        <div className="container-fluid max-w-7xl mx-auto px-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+            <span className="text-white">How It </span>
+            <span className="text-primary">Works</span>
+          </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
             {steps.map((step, index) => (
               <div 
                 key={index} 
-                className="bg-dark p-6 rounded-lg border border-gray-800 hover:border-primary transition-all group hover-card"
+                className="bg-dark p-8 rounded-xl border border-gray-800 hover:border-primary transition-all group hover:shadow-lg hover:shadow-primary/10 transform hover:-translate-y-1 duration-300"
               >
-                <div className="w-20 h-20 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:bg-opacity-100 transition-all">
+                <div className="w-24 h-24 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mb-8 group-hover:bg-primary group-hover:bg-opacity-100 transition-all mx-auto">
                   <img 
                     src={logoOnly} 
                     alt="JetFrame Logo" 
-                    className="w-12 h-12 group-hover:filter group-hover:brightness-200 transition-all" 
+                    className="w-14 h-14 group-hover:filter group-hover:brightness-200 transition-all" 
                   />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-                <p className="text-gray-400">{step.description}</p>
+                <h3 className="text-2xl font-bold mb-4 text-center">{step.title}</h3>
+                <p className="text-gray-400 text-center mb-6">{step.description}</p>
                 {/* Step icon */}
-                <div className="mt-4 text-primary opacity-60 group-hover:opacity-100 transition-opacity">
+                <div className="mt-4 text-primary opacity-60 group-hover:opacity-100 transition-opacity text-center">
                   {step.icon}
                 </div>
               </div>
             ))}
           </div>
 
+          {/* Call to action button */}
+          <div className="text-center mt-12">
+            <button 
+              onClick={handleGenerateClick} 
+              className="btn-primary px-10 py-4 text-lg hover:scale-105 transition-transform"
+            >
+              Start Building Your Project
+            </button>
+          </div>
+
           {/* Additional wing in bottom-right corner */}
-          <div className="relative h-24 mt-16">
+          <div className="relative h-24 mt-12 mb-32">
             <div className="wing-scatter absolute bottom-0 right-0 opacity-30">
               <img 
                 src={logoOnly} 
                 alt="JetFrame Logo" 
-                className="w-20 h-20" 
+                className="w-24 h-24" 
                 style={{ animation: 'float-plane 8s ease-in-out infinite' }}
               />
             </div>
           </div>
         </div>
       </section>
-
-      {/* Fixed Footer */}
-      <footer className="py-6 border-t border-gray-800 bg-[#191919]">
-        <div className="container-fluid">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <img src={logoOnly} alt="JetFrame Logo" className="w-6 h-6 mr-2" />
-              <span className="text-lg font-bold">
-                <span className="text-white">JetFrame</span>
-                <span className="text-primary">.Dev</span>
-              </span>
-            </div>
-            <div className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} JetFrame.Dev. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

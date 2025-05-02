@@ -11,6 +11,7 @@ export default {
         secondary: "#FFA559", // Lighter orange
         accent: "#FFD6A5", // Very light orange
         dark: "#191919", // Near black
+        "dark-secondary": "#252525", // Slightly lighter dark for cards/forms
         darkGray: "#2D2D2D", // Dark gray
         mediumGray: "#3D3D3D" // Medium gray
       },

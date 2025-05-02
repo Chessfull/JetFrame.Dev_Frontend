@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoOnly from '../assets/images/Logo-Only-removebg.png';
 import { apiService } from '../services/api';
+import axios from 'axios';
 
 // Type definitions for API responses
 interface Technology {
@@ -1005,9 +1006,7 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
                       return a.name.localeCompare(b.name);
                     })
                     .map((db) => {
-                      // Log database names to see the exact format
-                      console.log(`Available database option: "${db.name}"`);
-                      
+                      // Remove log statement
                       return (
                         <div 
                           key={db.id}
@@ -1284,7 +1283,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
         connectionString = '';
     }
     
-    console.log(`Generated connection string for ${dbName}:`, connectionString);
     return connectionString;
   };
 
@@ -1296,8 +1294,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
         projectConfig.database, 
         projectConfig.projectName || 'mydb'
       );
-      
-      console.log(`Setting connection string for ${projectConfig.database}:`, defaultConnectionString);
       
       // Force the connection string update
       setProjectConfig(prev => ({
@@ -1316,8 +1312,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
           projectConfig.database, 
           projectConfig.projectName
         );
-        
-        console.log(`Updating connection string for project name change:`, updatedConnectionString);
         
         setProjectConfig(prev => ({
           ...prev,
@@ -2101,8 +2095,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
 
   // Completely rewrite the database selection handler to fix the connection string issue
   const handleDatabaseSelection = (dbName: string) => {
-    console.log(`Setting database to: "${dbName}"`);
-    
     // Generate appropriate connection string based on exact database name
     let connectionString = '';
     const projectNameForDb = projectConfig.projectName || 'mydb';
@@ -2122,8 +2114,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
       connectionString = `Server=localhost;Database=${projectNameForDb};`;
     }
     
-    console.log(`Generated connection string: "${connectionString}"`);
-    
     // Set state with the new connection string - use function form to ensure we get the latest state
     setProjectConfig(prev => {
       const newState = {
@@ -2132,7 +2122,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
         connectionString: connectionString
       };
       
-      console.log("New project config:", newState);
       return newState;
     });
     
@@ -2141,7 +2130,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
       const connectionInput = document.querySelector('input[placeholder="Enter your database connection string"]') as HTMLInputElement;
       if (connectionInput) {
         connectionInput.value = connectionString;
-        console.log("Set connection string in input field directly");
       }
     }, 100);
   };
@@ -2166,8 +2154,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
         default:
           connectionString = `Server=localhost;Database=${projectConfig.projectName};`;
       }
-      
-      console.log(`Project name changed, updating connection string: ${connectionString}`);
       
       // Only update if we're using the default pattern (contains localhost)
       if (projectConfig.connectionString.includes('localhost')) {
