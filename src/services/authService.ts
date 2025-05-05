@@ -38,11 +38,6 @@ const generateState = (): string => {
   return state;
 };
 
-// Get stored OAuth state
-const getStoredState = (): string | null => {
-  return sessionStorage.getItem('oauth_state');
-};
-
 // Common headers
 const headers = {
   'Content-Type': 'application/json',
@@ -127,7 +122,7 @@ const authService = {
   },
   
   // Get OAuth URL for the specified provider
-  getOAuthUrl: async (provider: string, returnUrl: string): Promise<string> => {
+  getOAuthUrl: async (provider: string): Promise<string> => {
     try {
       // Generate state parameter
       const state = generateState();

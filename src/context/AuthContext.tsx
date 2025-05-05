@@ -160,12 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      // The current URL as the return URL after authentication
-      const protocol = window.location.protocol;
-      const host = window.location.host;
-      const returnUrl = `${protocol}//${host}/auth/${provider.toLowerCase()}/callback`;
-      
-      return await authService.getOAuthUrl(provider, returnUrl);
+      return await authService.getOAuthUrl(provider);
     } catch (err: any) {
       console.error(`OAuth URL generation error:`, err);
       const errorMsg = err.response?.data?.message || `Failed to get ${provider} authentication URL.`;
@@ -219,7 +214,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const redirectUrl = await authService.getOAuthUrl(provider, window.location.origin + '/auth/' + provider.toLowerCase() + '/callback');
+      const redirectUrl = await authService.getOAuthUrl(provider);
       window.location.href = redirectUrl;
     } catch (err: any) {
       console.error(`${provider} login error:`, err);

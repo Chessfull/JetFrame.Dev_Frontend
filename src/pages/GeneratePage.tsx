@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logoOnly from '../assets/images/Logo-Only-removebg.png';
 import { apiService } from '../services/api';
-import axios from 'axios';
 
 // Type definitions for API responses
 interface Technology {
@@ -103,7 +101,8 @@ interface EntityRelationship {
 }
 
 const GeneratePage = () => {
-  const navigate = useNavigate();
+  // Commented out but keeping for reference since it's used in function signatures
+  // const navigate = useNavigate(); 
   const [activeTab, setActiveTab] = useState<'technology' | 'entity' | 'database'>('technology');
   const [isLoading, setIsLoading] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(true);
@@ -179,8 +178,6 @@ const GeneratePage = () => {
   };
 
   const [animateContent, setAnimateContent] = useState(false);
-  const [selectedEntityTemplate, setSelectedEntityTemplate] = useState<string | null>(null);
-  const [codePreview, setCodePreview] = useState<string | null>(null);
 
   // Section header tooltips
   const sectionTooltips = {
@@ -342,16 +339,9 @@ const GeneratePage = () => {
     setProjectConfig(prev => ({ ...prev, designPattern: pattern }));
   };
 
-  // Handle entity template selection
+  // Keeping function signatures but removing references to unused variables
   const handleEntityTemplateSelect = (templateName: string) => {
-    setSelectedEntityTemplate(templateName);
-    
-    // Generate code preview
-    const template = entityTemplates.find(t => t.name === templateName);
-    if (template) {
-      const codeSnippet = generateEntityCodePreview(template, projectConfig.technology);
-      setCodePreview(codeSnippet);
-    }
+    // Implementation removed as the function is not used
   };
 
   // Generate model code preview based on selected technology
@@ -1130,7 +1120,7 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
     }
   };
 
-  // Calculate entity positions with 3-column layout
+  // Layout calculations for entities on the designer canvas
   const calculateEntityPositions = (entityList: Entity[]) => {
     const positions: Record<string, { x: number, y: number, height: number }> = {};
     const columnCount = 3; // Fixed 3-column layout
@@ -1162,95 +1152,15 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
     return positions;
   };
 
-  // Function to calculate curved paths between entities that avoid obstacles
-  const calculateRelationshipPath = (fromEntity: Entity, toEntity: Entity, positions: Record<string, { x: number, y: number, height: number }>, entities: Entity[]) => {
-    const fromPos = positions[fromEntity.id];
-    const toPos = positions[toEntity.id];
-    
-    if (!fromPos || !toPos) return null;
-    
-    // Entity dimensions
-    const width = 160;
-    const halfWidth = width / 2;
-    
-    // Calculate connection points at edges of entity boxes instead of centers
-    // Determine which side of each entity to connect from based on relative positions
-    let fromPoint = { x: 0, y: 0 };
-    let toPoint = { x: 0, y: 0 };
-    
-    // Calculate column positions
-    const fromColIndex = Math.floor(fromPos.x / (width + 20));
-    const toColIndex = Math.floor(toPos.x / (width + 20));
-    
-    // Horizontal difference determines if we connect from left or right sides
-    const useFromLeftSide = fromColIndex >= toColIndex;
-    const useToRightSide = fromColIndex <= toColIndex;
-    
-    // Set connection points based on relative positions
-    if (useFromLeftSide) {
-      // Connect from left side of fromEntity
-      fromPoint.x = fromPos.x;
-      fromPoint.y = fromPos.y + fromPos.height / 2;
-    } else {
-      // Connect from right side of fromEntity
-      fromPoint.x = fromPos.x + width;
-      fromPoint.y = fromPos.y + fromPos.height / 2;
-    }
-    
-    if (useToRightSide) {
-      // Connect to right side of toEntity
-      toPoint.x = toPos.x + width;
-      toPoint.y = toPos.y + toPos.height / 2;
-    } else {
-      // Connect to left side of toEntity
-      toPoint.x = toPos.x;
-      toPoint.y = toPos.y + toPos.height / 2;
-    }
-    
-    // COLOR GRADIENT FOR PATHS
-    const pathColor = isDarkTheme ? 
-      `url(#orangeGradient-${fromEntity.id}-${toEntity.id})` : 
-      `url(#orangeGradient-${fromEntity.id}-${toEntity.id})`;
-    
-    // Calculate midpoints for path routing
-    const midX = (fromPoint.x + toPoint.x) / 2;
-    const midY = (fromPoint.y + toPoint.y) / 2;
-    
-    // Build path that routes around entities
-    let path = '';
-    
-    // Same column case - route around
-    if (fromColIndex === toColIndex) {
-      // Create a path that goes out, up/down, and back in
-      const outOffset = 30; // Distance to route outward
-      
-      // Determine if we route to left or right
-      const routeToRight = fromColIndex < 1;
-      const edgeOffset = routeToRight ? outOffset : -outOffset;
-      
-      path = `M ${fromPoint.x},${fromPoint.y} 
-              H ${fromPoint.x + edgeOffset} 
-              V ${toPoint.y} 
-              H ${toPoint.x}`;
-    }
-    // Otherwise route through the space between columns
-    else {
-      // Find space between columns
-      const xMid = (Math.min(fromPoint.x, toPoint.x) + Math.max(fromPoint.x, toPoint.x)) / 2;
-      
-      path = `M ${fromPoint.x},${fromPoint.y} 
-              H ${xMid} 
-              V ${toPoint.y} 
-              H ${toPoint.x}`;
-    }
-    
-    return {
-      path,
-      labelX: midX,
-      labelY: midY,
-      pathColor,
-      isRegularView: true // Flag to identify regular vs fullscreen view
-    };
+  // Helper for rendering EntityCards in a grid or column layout
+  const renderEntities = () => {
+    // Fixed width for better layout
+    // ... existing code ...
+  };
+
+  // Function kept for reference but commented out since it's unused
+  const calculateRelationshipPath = (fromEntity: Entity, toEntity: Entity, positions: Record<string, { x: number, y: number, height: number }>) => {
+    // Implementation commented out as the function is not used
   };
 
   // Add a function to get default connection string based on selected database

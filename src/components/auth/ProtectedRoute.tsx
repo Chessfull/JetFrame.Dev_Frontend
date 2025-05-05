@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requireAuth = true }: ProtectedRouteProps) => {
-  const { isAuthenticated, loading, user } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [lastNavigationTime, setLastNavigationTime] = useState(0);
