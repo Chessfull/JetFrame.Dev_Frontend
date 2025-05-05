@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { LoginRequest } from '../../types/auth';
 
 const LoginForm = () => {
-  const { login, getOAuthUrl, loading, error, clearError } = useAuth();
+  const { login, loading, error, clearError } = useAuth();
   const [formData, setFormData] = useState<LoginRequest>({
     email: '',
     password: ''
