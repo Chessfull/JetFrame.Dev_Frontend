@@ -11,7 +11,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'https://localhost:60713',
+        target: 'https://jetframedev-production.up.railway.app/',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path

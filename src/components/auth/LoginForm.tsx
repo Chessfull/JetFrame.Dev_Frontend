@@ -68,7 +68,7 @@ const LoginForm = () => {
       setFormData({ email: '', password: '' });
       
       // Tüm OAuth yönlendirmeleri backend üzerinden
-      const backendUrl = 'https://localhost:60713/api/Auth';
+      const backendUrl = 'https://jetframedev-production.up.railway.app/api/Auth';
       let endpoint = '';
       
       if (provider.toLowerCase() === 'github') {

@@ -5,7 +5,7 @@ import authService from './authService';
 axios.defaults.withCredentials = true;
 
 // API URL'i burada sabit olarak tanımlayın - tüm isteklerde kullanılacak
-axios.defaults.baseURL = 'https://localhost:60713';
+axios.defaults.baseURL = 'https://jetframedev-production.up.railway.app';
 
 // CORS için gerekli header'ları ekle
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
