@@ -1,5 +1,5 @@
 // API Base URL - değiştirilmesi gereken tek yer
-const API_BASE_URL = 'https://localhost:60713/api'; // Gerçek backend URL'nizi buraya yazın
+const API_BASE_URL = 'https://jetframedev-production.up.railway.app/api'; // Gerçek backend URL'nizi buraya yazın
 
 // API endpoint'leri
 const ENDPOINTS = {
