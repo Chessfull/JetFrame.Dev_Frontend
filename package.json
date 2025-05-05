@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc -b --noEmit && vite build",
     "build:prod": "vite build",
+    "build:vercel": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
