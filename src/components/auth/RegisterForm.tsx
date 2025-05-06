@@ -94,6 +94,7 @@ const RegisterForm = () => {
   // Handle OAuth registration
   const handleOAuthRegister = async (provider: string) => {
     try {
+      console.log("Worked Register Form!");
       const url = await getOAuthUrl(provider);
       window.location.href = url;
     } catch (err) {

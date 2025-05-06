@@ -65,6 +65,9 @@ const LoginForm = () => {
   // Handle OAuth login
   const handleOAuthLogin = async (provider: string) => {
     try {
+
+      console.log("Worked Login Form!");
+
       // Önce loading durumunu ayarla
       setFormData({ email: '', password: '' });
       
