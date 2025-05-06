@@ -132,12 +132,25 @@ const authService = {
         ? `${getCurrentOrigin()}/auth/github/callback`
         : `${getCurrentOrigin()}/auth/google/callback`;
       
-      // Make sure we're using the correct URL format for the backend
+      // Different handling for GitHub - use the specific endpoint
+      if (provider.toLowerCase() === 'github') {
+        const url = `/api/Auth/github-login-url?returnUrl=${encodeURIComponent(redirectUri)}`;
+        const response = await axios.get(url, { withCredentials: true });
+        
+        // Store the state from backend
+        if (response.data.state) {
+          sessionStorage.setItem('oauth_state', response.data.state);
+        }
+        
+        // Return the URL directly
+        return response.data.url;
+      }
+      
+      // For other providers, use the existing flow
       const url = `${AUTH_ENDPOINTS.getOAuthUrl}?provider=${provider}&returnUrl=${encodeURIComponent(redirectUri)}&state=${state}`;
-      console.log("URL1: ", url);
       const response = await axios.get(url, { withCredentials: true });
-      console.log("response: ", response);
-      // Backend redirectUrl adında bir property döndürüyor
+      
+      // Return the redirectUrl
       return response.data.redirectUrl;
     } catch (error) {
       console.error(`${provider} OAuth URL error:`, error);

@@ -68,44 +68,17 @@ const LoginForm = () => {
       // Önce loading durumunu ayarla
       setFormData({ email: '', password: '' });
       
-      // Tüm OAuth yönlendirmeleri backend üzerinden
-      const backendUrl = await authService.getOAuthUrl(provider);
-      let endpoint = '';
+      // Get OAuth URL using authService
+      const url = await authService.getOAuthUrl(provider);
       
-      if (provider.toLowerCase() === 'github') {
-        endpoint = 'github-login-url';
-      } else if (provider.toLowerCase() === 'google') {
-        endpoint = 'google-login-url';
-      } else {
-        endpoint = 'external-login';
+      if (!url) {
+        throw new Error('Invalid response from backend: missing URL');
       }
       
-      // Backend üzerinden OAuth login URL'ini al
-      const response = await fetch(`${backendUrl}/${endpoint}?returnUrl=${encodeURIComponent(window.location.origin + '/auth/' + provider.toLowerCase() + '/callback')}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`${provider} login URL request failed with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (!data.redirectUrl) {
-        throw new Error('Invalid response from backend: missing redirectUrl');
-      }
-      
-      // Backendden gelen state'i client tarafına da kaydet (karşılaştırma için)
-      if (data.state) {
-        sessionStorage.setItem('oauth_state', data.state);
-      }
-      
-      window.location.href = data.redirectUrl;
+      // Important: Perform a redirect, not a fetch
+      window.location.href = url;
     } catch (err) {
+      console.error(`${provider} login error:`, err);
       // Error handling
     }
   };
