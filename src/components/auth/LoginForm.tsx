@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LoginRequest } from '../../types/auth';
+import authService from '../../services/authService';
 
 const LoginForm = () => {
   const { login, loading, error, clearError } = useAuth();
@@ -67,45 +68,44 @@ const LoginForm = () => {
       // Önce loading durumunu ayarla
       setFormData({ email: '', password: '' });
       
-      // Tüm OAuth yönlendirmeleri backend üzerinden
-      const backendUrl = 'https://jetframedev-production.up.railway.app/api/Auth';
-      let endpoint = '';
+      // authService üzerinden OAuth URL'ini al - bu yaklaşım, environment variable'ları
+      // doğru şekilde kullanacak ve "${GITHUB_CLIENT_ID}" gibi ham string yerine 
+      // gerçek client ID değerini kullanacaktır
+      const url = await authService.getOAuthUrl(provider);
       
-      if (provider.toLowerCase() === 'github') {
-        endpoint = 'github-login-url';
-      } else if (provider.toLowerCase() === 'google') {
-        endpoint = 'google-login-url';
-      } else {
-        endpoint = 'external-login';
-      }
-      
-      // Backend üzerinden OAuth login URL'ini al
-      const response = await fetch(`${backendUrl}/${endpoint}?returnUrl=${encodeURIComponent(window.location.origin + '/auth/' + provider.toLowerCase() + '/callback')}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`${provider} login URL request failed with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (!data.redirectUrl) {
+      // URL kontrolü
+      if (!url) {
         throw new Error('Invalid response from backend: missing redirectUrl');
       }
       
+      // URL'den state parametresini al (authService generateState() fonksiyonunu kullanır)
+      const urlObject = new URL(url);
+      const state = urlObject.searchParams.get('state');
+      
       // Backendden gelen state'i client tarafına da kaydet (karşılaştırma için)
-      if (data.state) {
-        sessionStorage.setItem('oauth_state', data.state);
+      if (state) {
+        sessionStorage.setItem('oauth_state', state);
       }
       
-      window.location.href = data.redirectUrl;
+      // Kullanıcıyı OAuth sağlayıcısına yönlendir
+      window.location.href = url;
     } catch (err) {
-      // Error handling
+      // Hata işleme
+      console.error(`${provider} login URL request failed:`, err);
+      
+      if (err instanceof Error) {
+        // Spesifik hata mesajlarını kontrol et
+        if (err.message.includes('status: 401') || err.message.includes('status: 403')) {
+          console.error('Authentication failed with the backend');
+        } else if (err.message.includes('missing redirectUrl')) {
+          console.error('Backend did not return a valid OAuth URL');
+        } else if (err.message.includes('Network Error')) {
+          console.error('Network connection issue when connecting to the backend');
+        }
+      }
+      
+      // Burada UI üzerinde hata gösterebilirsiniz
+      // Örneğin: setError(`${provider} ile giriş yapılamadı. Lütfen daha sonra tekrar deneyin.`);
     }
   };
 
