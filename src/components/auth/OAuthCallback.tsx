@@ -40,6 +40,13 @@ const OAuthCallback = () => {
         const state = searchParams.get('state');
         const errorParam = searchParams.get('error');
 
+        
+        console.log("Processing OAuth callback with:", { 
+          provider, 
+          code: code?.substring(0, 5) + "...", // Only show the first few characters for security
+          state: state?.substring(0, 5) + "..."
+        });
+
         // Retrieve the stored state from session storage
         const storedState = sessionStorage.getItem('oauth_state');
         
@@ -72,13 +79,7 @@ const OAuthCallback = () => {
           // State mismatch but continue anyway
         }
 
-        console.log("Processing OAuth callback with:", { 
-          provider, 
-          code: code?.substring(0, 5) + "...", // Only show the first few characters for security
-          state: state?.substring(0, 5) + "...",
-          redirectUri: `${window.location.origin}/auth/${provider}/callback` 
-        });
-        
+
         // Capitalize the first letter of provider
         const normalizedProvider = provider.charAt(0).toUpperCase() + provider.slice(1).toLowerCase();
         
