@@ -134,9 +134,9 @@ const authService = {
       
       // Make sure we're using the correct URL format for the backend
       const url = `${AUTH_ENDPOINTS.getOAuthUrl}?provider=${provider}&returnUrl=${encodeURIComponent(redirectUri)}&state=${state}`;
-      
+      console.log("URL1: ", url);
       const response = await axios.get(url, { withCredentials: true });
-      
+      console.log("response: ", response);
       // Backend redirectUrl adında bir property döndürüyor
       return response.data.redirectUrl;
     } catch (error) {

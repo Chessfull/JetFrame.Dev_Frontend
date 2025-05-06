@@ -75,8 +75,6 @@ const LoginForm = () => {
       // doğru şekilde kullanacak ve "${GITHUB_CLIENT_ID}" gibi ham string yerine 
       // gerçek client ID değerini kullanacaktır
       const url = await authService.getOAuthUrl(provider);
-
-      console.log("URL: ", url);
       
       // URL kontrolü
       if (!url) {
