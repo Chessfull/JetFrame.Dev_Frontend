@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LoginRequest } from '../../types/auth';
+import authService from '../../services/authService';
 
 const LoginForm = () => {
   const { login, loading, error, clearError } = useAuth();
@@ -68,7 +69,7 @@ const LoginForm = () => {
       setFormData({ email: '', password: '' });
       
       // Tüm OAuth yönlendirmeleri backend üzerinden
-      const backendUrl = 'https://jetframedev-production.up.railway.app/api/Auth';
+      const backendUrl = await authService.getOAuthUrl(provider);
       let endpoint = '';
       
       if (provider.toLowerCase() === 'github') {
