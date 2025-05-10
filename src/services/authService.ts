@@ -21,7 +21,19 @@ const AUTH_ENDPOINTS = {
 
 // OAuth Settings - use the current window location for callbacks
 const getCurrentOrigin = () => {
-  return window.location.origin; // Örn: "http://localhost:5173"
+  return window.location.origin; // e.g. "http://localhost:5173" in dev, "https://jetframe.dev" in prod
+};
+
+// Determine if we're in development or production
+const isDevelopment = () => {
+  const hostname = window.location.hostname;
+  return hostname === 'localhost' || hostname === '127.0.0.1';
+};
+
+// Get environment-specific redirect URI
+const getRedirectUri = (provider: string) => {
+  const base = getCurrentOrigin();
+  return `${base}/auth/${provider.toLowerCase()}/callback`;
 };
 
 // Generate secure state parameter for OAuth flow
@@ -46,12 +58,9 @@ const headers = {
 
 // Format OAuth request for backend compatibility
 const formatOAuthRequest = (params: ExternalAuthCallbackRequest) => {
-  // Always use dynamic redirectUri based on current origin
-  const redirectUri = params.provider.toLowerCase() === 'github' 
-    ? `${getCurrentOrigin()}/auth/github/callback`
-    : `${getCurrentOrigin()}/auth/google/callback`;
+  // Use environment-specific redirect URI
+  const redirectUri = getRedirectUri(params.provider);
   
-  // Ensure state matches exactly what GitHub returns
   return {
     provider: params.provider,
     code: params.code,
@@ -131,8 +140,16 @@ const authService = {
         { withCredentials: true }
       );
     } catch (error) {
-      console.error('Logout error:', error);
-      throw error;
+      // Don't throw error on 401 - it just means we're already logged out
+      if (axios.isAxiosError(error) && error.response?.status !== 401) {
+        console.error('Logout error:', error);
+        throw error;
+      } else {
+        console.log('Logout completed (token already expired)');
+      }
+    } finally {
+      // Always clear any local auth state regardless of API response
+      // Add any local state cleanup here if needed
     }
   },
   
@@ -142,30 +159,32 @@ const authService = {
       // Generate state parameter
       const state = generateState();
       
-      // Use dynamic redirect URI based on current origin
-      const redirectUri = provider.toLowerCase() === 'github' 
-        ? `${getCurrentOrigin()}/auth/github/callback`
-        : `${getCurrentOrigin()}/auth/google/callback`;
+      // Use environment-specific redirect URI
+      const redirectUri = getRedirectUri(provider);
       
-      // Different handling for GitHub - use the specific endpoint
+      // Different endpoints for different providers
+      let url;
       if (provider.toLowerCase() === 'github') {
-        const url = `/api/Auth/github-login-url?returnUrl=${encodeURIComponent(redirectUri)}`;
-        const response = await axios.get(url, { withCredentials: true });
-        
-        // Store the state from backend
-        if (response.data.state) {
-          sessionStorage.setItem('oauth_state', response.data.state);
-        }
-        
-        // Return the URL directly
-        return response.data.url;
+        url = `/api/Auth/github-login-url?returnUrl=${encodeURIComponent(redirectUri)}`;
+      } else if (provider.toLowerCase() === 'google') {
+        url = `/api/Auth/google-login-url?returnUrl=${encodeURIComponent(redirectUri)}`;
+      } else {
+        url = `${AUTH_ENDPOINTS.getOAuthUrl}?provider=${provider}&returnUrl=${encodeURIComponent(redirectUri)}&state=${state}`;
       }
       
-      // For other providers, use the existing flow
-      const url = `${AUTH_ENDPOINTS.getOAuthUrl}?provider=${provider}&returnUrl=${encodeURIComponent(redirectUri)}&state=${state}`;
+      console.log(`Requesting OAuth URL for ${provider} with redirect to ${redirectUri}`);
       const response = await axios.get(url, { withCredentials: true });
       
-      // Return the redirectUrl
+      // Store the state from backend if provided
+      if (response.data.state) {
+        sessionStorage.setItem('oauth_state', response.data.state);
+      }
+      
+      // Log the redirect URL for debugging
+      if (isDevelopment()) {
+        console.log(`Got OAuth URL for ${provider}:`, response.data.redirectUrl);
+      }
+      
       return response.data.redirectUrl;
     } catch (error) {
       console.error(`${provider} OAuth URL error:`, error);

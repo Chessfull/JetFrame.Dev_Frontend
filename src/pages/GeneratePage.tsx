@@ -1060,7 +1060,7 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
                   <input
                     type="text"
                     className="w-full p-3 bg-[#1e1e1e] border border-gray-700 rounded-md focus:border-primary focus:ring-1 focus:ring-primary custom-scrollbar"
-                    placeholder="Enter your database connection string"
+                    placeholder="Leave empty to use Windows Authentication (recommended)"
                     value={projectConfig.connectionString}
                     onChange={(e) => setProjectConfig(prev => ({ ...prev, connectionString: e.target.value }))}
                   />
@@ -1090,17 +1090,17 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
                         <div 
                           key={tech.id}
                           className={`p-4 border rounded-md transition-all ${
-                            tech.isAvailable ? 'cursor-pointer hover:shadow-lg hover:translate-y-[-2px]' : 'cursor-not-allowed opacity-60'
+                            tech.name === 'React' || tech.isAvailable ? 'cursor-pointer hover:shadow-lg hover:translate-y-[-2px]' : 'cursor-not-allowed opacity-60'
                           } ${
                             projectConfig.frontendTechnology === tech.name 
                               ? 'border-primary bg-primary bg-opacity-10' 
                               : 'border-gray-700 hover:border-gray-500'
                             }`}
-                          onClick={() => tech.isAvailable && handleFrontendTechnologyChange(tech.name)}
+                          onClick={() => (tech.name === 'React' || tech.isAvailable) && handleFrontendTechnologyChange(tech.name)}
                         >
                           <div className="flex justify-between items-center">
                             <span>{tech.name}</span>
-                            {!tech.isAvailable && (
+                            {tech.name !== 'React' && !tech.isAvailable && (
                               <span className="text-xs bg-gray-800 text-gray-400 py-1 px-2 rounded-full">Coming Soon</span>
                             )}
                             {projectConfig.frontendTechnology === tech.name && (
@@ -1251,35 +1251,8 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
 
   // Add a function to get default connection string based on selected database
   const getDefaultConnectionString = (dbName: string, projectName: string = 'mydb'): string => {
-    // Sanitize project name for use in connection string (remove spaces, special chars)
-    const sanitizedName = projectName ? projectName.replace(/[^a-zA-Z0-9]/g, '') : 'mydb';
-    
-    let connectionString = '';
-    
-    switch (dbName) {
-      case 'PostgreSQL':
-        connectionString = `Host=localhost;Port=5432;Database=${sanitizedName};Username=postgres;Password=password;`;
-        break;
-      case 'MySQL':
-        connectionString = `Server=localhost;Port=3306;Database=${sanitizedName};Uid=root;Pwd=password;`;
-        break;
-      case 'SqlServer':
-        connectionString = `Server=localhost;Database=${sanitizedName};Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;`;
-        break;
-      case 'MongoDB':
-        connectionString = `mongodb://localhost:27017/${sanitizedName}`;
-        break;
-      case 'Oracle':
-        connectionString = `Data Source=localhost:1521/ORCLPDB1;User Id=system;Password=password;`;
-        break;
-      case 'SQLite':
-        connectionString = `Data Source=${sanitizedName}.db;Version=3;`;
-        break;
-      default:
-        connectionString = '';
-    }
-    
-    return connectionString;
+    // Return empty string regardless of database type - let the backend handle the default
+    return '';
   };
 
   // Add effect to set default connection string when database is selected or project name changes
@@ -1487,7 +1460,7 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
         architecture: projectConfig.architecture,
         designPattern: projectConfig.designPattern,
         database: projectConfig.database,
-        connectionString: projectConfig.connectionString,
+        connectionString: projectConfig.connectionString.trim(), // Trim to handle spaces-only
         includeFrontend: projectConfig.includeFrontend,
         ...(projectConfig.includeFrontend && { frontendTechnology: projectConfig.frontendTechnology }),
         entities: apiEntities
@@ -2091,83 +2064,36 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
     );
   };
 
-  // Completely rewrite the database selection handler to fix the connection string issue
+  // Modified database selection handler to use an empty connection string by default
   const handleDatabaseSelection = (dbName: string) => {
-    // Generate appropriate connection string based on exact database name
-    let connectionString = '';
-    const projectNameForDb = projectConfig.projectName || 'mydb';
-    
-    // Check the exact database name from the UI
-    if (dbName === 'SqlServer') {
-      connectionString = `Server=localhost;Database=${projectNameForDb};User Id=sa;Password=password;TrustServerCertificate=True;`;
-    } 
-    else if (dbName === 'MySQL') {
-      connectionString = `Server=localhost;Port=3306;Database=${projectNameForDb};Uid=root;Pwd=password;`;
-    } 
-    else if (dbName === 'PostgreSQL') {
-      connectionString = `Host=localhost;Port=5432;Database=${projectNameForDb};Username=postgres;Password=password;`;
-    }
-    else {
-      // Fallback for any other database
-      connectionString = `Server=localhost;Database=${projectNameForDb};`;
-    }
-    
-    // Set state with the new connection string - use function form to ensure we get the latest state
+    // Set state with empty connection string
     setProjectConfig(prev => {
-      const newState = {
+      return {
         ...prev,
         database: dbName,
-        connectionString: connectionString
+        connectionString: '' // Always start with empty connection string
       };
-      
-      return newState;
     });
-    
-    // Force the connection string to update in the UI by setting it directly
-    setTimeout(() => {
-      const connectionInput = document.querySelector('input[placeholder="Enter your database connection string"]') as HTMLInputElement;
-      if (connectionInput) {
-        connectionInput.value = connectionString;
-      }
-    }, 100);
   };
 
   // Update useEffect to also handle connection string properly
   useEffect(() => {
-    if (projectConfig.database && projectConfig.projectName) {
-      // Generate a new connection string based on current database and new project name
-      let connectionString = '';
-      
-      // Make sure database names match exactly
-      switch (projectConfig.database) {
-        case 'MySQL':
-          connectionString = `Server=localhost;Port=3306;Database=${projectConfig.projectName};Uid=root;Pwd=password;`;
-          break;
-        case 'PostgreSQL':
-          connectionString = `Host=localhost;Port=5432;Database=${projectConfig.projectName};Username=postgres;Password=password;`;
-          break;
-        case 'SqlServer':
-          connectionString = `Server=localhost;Database=${projectConfig.projectName};User Id=sa;Password=password;TrustServerCertificate=True;`;
-          break;
-        default:
-          connectionString = `Server=localhost;Database=${projectConfig.projectName};`;
-      }
-      
-      // Only update if we're using the default pattern (contains localhost)
-      if (projectConfig.connectionString.includes('localhost')) {
-        setProjectConfig(prev => ({
-          ...prev,
-          connectionString: connectionString
-        }));
-      }
-    }
+    // No longer auto-generating connection strings on project name change
+    // The connection string will remain empty or user-provided
   }, [projectConfig.projectName, projectConfig.database]);
 
   // Fetch frontend technologies
   const fetchFrontendTechnologies = async () => {
     try {
       const data = await apiService.getFrontendTechnologies();
-      setAvailableFrontendTechnologies(data);
+      // Make sure React is always available regardless of what the API returns
+      const updatedData = data.map(tech => {
+        if (tech.name === 'React') {
+          return { ...tech, isAvailable: true };
+        }
+        return tech;
+      });
+      setAvailableFrontendTechnologies(updatedData);
     } catch (error) {
       console.error('Error fetching frontend technologies:', error);
       // Fallback to some defaults if API fails

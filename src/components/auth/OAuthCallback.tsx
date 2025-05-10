@@ -12,13 +12,13 @@ const OAuthCallback = () => {
   const hasProcessed = useRef<boolean>(false);
 
   useEffect(() => {
-    // Eğer kullanıcı zaten giriş yapmışsa, ana sayfaya yönlendir
+    // If user is already authenticated, redirect to home
     if (isAuthenticated) {
       navigate('/');
       return;
     }
 
-    // Daha önce işlenmiş mi kontrol et
+    // Check if already processed
     if (hasProcessed.current) {
       return;
     }
@@ -30,7 +30,7 @@ const OAuthCallback = () => {
           return;
         }
         
-        // Yalnızca bir kez işle
+        // Only process once
         hasProcessed.current = true;
         setIsProcessing(true);
         
@@ -43,8 +43,8 @@ const OAuthCallback = () => {
         
         console.log("Processing OAuth callback with:", { 
           provider, 
-          code: code?.substring(0, 5) + "...", // Only show the first few characters for security
-          state: state?.substring(0, 5) + "..."
+          code: code ? `${code.substring(0, 5)}...` : 'null', 
+          state: state ? `${state.substring(0, 5)}...` : 'null'
         });
 
         // Retrieve the stored state from session storage
@@ -64,31 +64,36 @@ const OAuthCallback = () => {
           return;
         }
 
-        // For OAuth providers, code might be missing if there's an issue with redirect
+        // For OAuth providers, code must be provided
         if (!code) {
           setError(`Missing authorization code. The OAuth provider may not be sending the code correctly. Check your OAuth app configuration and ensure redirect URLs match exactly.`);
           setIsProcessing(false);
           return;
         }
 
-        // Verify state parameter to prevent CSRF attacks - making this check optional
-        // as some providers might not return the exact same state
-        if (!state) {
-          // Continue without state
-        } else if (storedState && state !== storedState) {
-          // State mismatch but continue anyway
+        // Optional state verification - log any mismatch but proceed anyway
+        if (storedState && state && state !== storedState) {
+          console.warn('OAuth state mismatch, potential CSRF risk', { 
+            stored: storedState, 
+            received: state 
+          });
         }
 
-
-        // Capitalize the first letter of provider
+        // Normalize provider name for backend
         const normalizedProvider = provider.charAt(0).toUpperCase() + provider.slice(1).toLowerCase();
+        
+        // Create the correct redirect URI based on current environment
+        const origin = window.location.origin;
+        const redirectUri = `${origin}/auth/${provider.toLowerCase()}/callback`;
+
+        console.log(`Sending OAuth callback to backend for ${normalizedProvider} with redirect URI: ${redirectUri}`);
         
         // Process the OAuth callback through backend service
         await handleOAuthCallback({
           provider: normalizedProvider,
           code,
-          state: state || storedState || "", // Use either received or stored state
-          redirectUri: `${window.location.origin}/auth/${provider}/callback`
+          state: state || storedState || "", 
+          redirectUri
         });
         
         // Clear the state from session storage
@@ -97,12 +102,14 @@ const OAuthCallback = () => {
         // Navigate to home on success
         navigate('/', { replace: true });
       } catch (err) {
+        console.error('OAuth callback error:', err);
+        
         if (err instanceof Error) {
           // Check for specific error types
           if (err.message.includes('bad_verification_code') || err.message.includes('already been used')) {
             setError('This authorization code has expired or has already been used. Please try signing in again.');
           } else {
-            setError(`Authentication failed. Please try again.`);
+            setError(`Authentication failed: ${err.message}`);
           }
         } else {
           setError('An unknown error occurred during authentication. Please try again.');
@@ -113,7 +120,7 @@ const OAuthCallback = () => {
 
     processOAuthCallback();
     
-    // Cleanup - sayfa terkedildiğinde işlem bayraklarını temizle
+    // Cleanup - clear processing flags when page is left
     return () => {
       setIsProcessing(false);
     };
@@ -146,7 +153,7 @@ const OAuthCallback = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
         <p className="text-gray-300 mb-4">
-          Please wait while we authenticate your account...
+          Please wait while we authenticate your account with {provider}...
         </p>
       </div>
     </div>
