@@ -80,14 +80,29 @@ const authService = {
   // Login with email and password
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
+      console.log('Attempting login with:', {...credentials, password: '********'});
+      
       const response = await axios.post(
         AUTH_ENDPOINTS.login, 
         credentials,
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        }
       );
+      
+      console.log('Login response status:', response.status);
+      console.log('Login success for:', credentials.email);
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
       throw error;
     }
   },

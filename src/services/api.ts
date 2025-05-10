@@ -1,20 +1,22 @@
 // API Base URL - değiştirilmesi gereken tek yer
-const API_BASE_URL = 'https://jetframedev-production.up.railway.app/api'; // Gerçek backend URL'nizi buraya yazın
+const API_BASE_URL = 'https://localhost:6790'; // Gerçek backend URL'nizi buraya yazın
 
 // API endpoint'leri
 const ENDPOINTS = {
-  technologies: '/project/technologies',
-  architectures: '/project/architectures',
-  patterns: '/project/patterns',
-  databases: '/project/databases',
-  generate: '/project/generate',
-  status: '/project/status',
-  download: '/project/download'
+  technologies: '/api/project/technologies',
+  architectures: '/api/project/architectures',
+  patterns: '/api/project/patterns',
+  databases: '/api/project/databases',
+  generate: '/api/project/generate',
+  status: '/api/project/status',
+  download: '/api/project/download',
+  frontendTechnologies: '/api/project/frontend-technologies'
 };
 
 // Fetch options for API calls
 const fetchOptions = {
   mode: 'cors' as RequestMode,
+  credentials: 'include' as RequestCredentials,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -27,9 +29,11 @@ export const apiService = {
   getTechnologies: async () => {
     try {
       const response = await fetch(`${API_BASE_URL}${ENDPOINTS.technologies}`, fetchOptions);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
+      
       return await response.json();
     } catch (error) {
       console.error('Error fetching technologies:', error);
@@ -115,5 +119,19 @@ export const apiService = {
   downloadProject: (projectId: string) => {
     // Bu fonksiyon doğrudan bir URL döndürür, fetch kullanmaz
     return `${API_BASE_URL}${ENDPOINTS.download}/${projectId}`;
+  },
+
+  // Frontend teknolojilerini getir
+  getFrontendTechnologies: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${ENDPOINTS.frontendTechnologies}`, fetchOptions);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching frontend technologies:', error);
+      throw error;
+    }
   }
 }; 

@@ -40,6 +40,8 @@ interface ProjectConfig {
   database: string;
   connectionString: string;
   entities: any[]; // Will be replaced with proper Entity interface later
+  includeFrontend: boolean;
+  frontendTechnology: string;
 }
 
 // Mock entity templates
@@ -118,7 +120,9 @@ const GeneratePage = () => {
     designPattern: '',
     database: '',
     connectionString: '',
-    entities: []
+    entities: [],
+    includeFrontend: false,
+    frontendTechnology: ''
   });
 
   // Available options (will be fetched from API)
@@ -126,6 +130,7 @@ const GeneratePage = () => {
   const [availableArchitectures, setAvailableArchitectures] = useState<Architecture[]>([]);
   const [availablePatterns, setAvailablePatterns] = useState<Pattern[]>([]);
   const [availableDatabases, setAvailableDatabases] = useState<Database[]>([]);
+  const [availableFrontendTechnologies, setAvailableFrontendTechnologies] = useState<{id: number, name: string}[]>([]);
 
   // Mock technology icons and descriptions
   const technologyDetails: Record<string, { icon: string, description: string, popularity: number }> = {
@@ -195,7 +200,12 @@ const GeneratePage = () => {
       case 'entity':
         return entities.length > 0; // Changed to require at least one entity
       case 'database':
-        return Boolean(projectConfig.database && projectConfig.connectionString && projectConfig.projectName);
+        const baseRequirements = Boolean(projectConfig.database && projectConfig.connectionString && projectConfig.projectName);
+        // If frontend is included, require a frontend technology
+        if (projectConfig.includeFrontend) {
+          return baseRequirements && Boolean(projectConfig.frontendTechnology);
+        }
+        return baseRequirements;
       default:
         return false;
     }
@@ -252,26 +262,48 @@ const GeneratePage = () => {
 
   // Load technologies when component mounts
   useEffect(() => {
-    const fetchTechnologies = async () => {
-      try {
-        const data = await apiService.getTechnologies();
-        
-        // Enrich technology data with details
-        const enrichedData = data.map((tech: Technology) => ({
-          ...tech,
-          icon: technologyDetails[tech.name]?.icon || '🔧',
-          description: technologyDetails[tech.name]?.description || 'A powerful development technology.',
-          popularity: technologyDetails[tech.name]?.popularity || 70
-        }));
-        
-        setAvailableTechnologies(enrichedData);
-      } catch (error) {
-        console.error('Error fetching technologies:', error);
-      }
-    };
-
+    // Immediately fetch technologies
     fetchTechnologies();
+    
+    // Start with dark theme
+    setIsDarkTheme(true);
+    
+    // Fetch frontend technologies
+    fetchFrontendTechnologies();
+
+    // Initialize entities list
+    setEntities([]);
   }, []);
+
+  // Define the missing fetchTechnologies function
+  const fetchTechnologies = async () => {
+    try {
+      const data = await apiService.getTechnologies();
+      
+      // Enrich technology data with details
+      const enrichedData = data.map((tech: Technology) => ({
+        ...tech,
+        icon: technologyDetails[tech.name]?.icon || '🔧',
+        description: technologyDetails[tech.name]?.description || 'A powerful development technology.',
+        popularity: technologyDetails[tech.name]?.popularity || 70
+      }));
+      
+      setAvailableTechnologies(enrichedData);
+    } catch (error) {
+      console.error('Error fetching technologies:', error);
+      // Set default values if API fails
+      setAvailableTechnologies([
+        { 
+          id: 1, 
+          name: 'DotNet', 
+          isAvailable: true,
+          icon: '🟣',
+          description: 'A free, cross-platform, open-source framework for building modern cloud-based applications.',
+          popularity: 85
+        }
+      ]);
+    }
+  };
 
   // Load architectures when technology changes
   useEffect(() => {
@@ -1005,7 +1037,7 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
                             projectConfig.database === db.name 
                               ? 'border-primary bg-primary bg-opacity-10' 
                               : 'border-gray-700 hover:border-gray-500'
-                          }`}
+                            }`}
                           onClick={() => handleDatabaseSelection(db.name)}
                         >
                           <div className="flex justify-between items-center">
@@ -1034,6 +1066,53 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
                   />
                 </div>
               )}
+
+              {/* Frontend Options */}
+              <div className="mt-8 border-t border-gray-700 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold">Include Frontend</h3>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={projectConfig.includeFrontend}
+                      onChange={(e) => handleFrontendToggle(e.target.checked)}
+                    />
+                    <div className="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+
+                {projectConfig.includeFrontend && (
+                  <div className="mt-4">
+                    <h3 className="text-lg font-bold mb-2">Frontend Technology</h3>
+                    <div className="space-y-3">
+                      {availableFrontendTechnologies.map(tech => (
+                        <div 
+                          key={tech.id}
+                          className={`p-4 border rounded-md transition-all ${
+                            tech.isAvailable ? 'cursor-pointer hover:shadow-lg hover:translate-y-[-2px]' : 'cursor-not-allowed opacity-60'
+                          } ${
+                            projectConfig.frontendTechnology === tech.name 
+                              ? 'border-primary bg-primary bg-opacity-10' 
+                              : 'border-gray-700 hover:border-gray-500'
+                            }`}
+                          onClick={() => tech.isAvailable && handleFrontendTechnologyChange(tech.name)}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span>{tech.name}</span>
+                            {!tech.isAvailable && (
+                              <span className="text-xs bg-gray-800 text-gray-400 py-1 px-2 rounded-full">Coming Soon</span>
+                            )}
+                            {projectConfig.frontendTechnology === tech.name && (
+                              <span className="text-green-500 ml-2">✓</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="bg-dark rounded-lg border border-gray-800 p-6 col-span-2">
@@ -1082,6 +1161,12 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
                         <div className="text-sm text-gray-400">Database</div>
                         <div className="font-medium">{projectConfig.database || '-'}</div>
                       </div>
+                      {projectConfig.includeFrontend && (
+                        <div>
+                          <div className="text-sm text-gray-400">Frontend</div>
+                          <div className="font-medium">{projectConfig.frontendTechnology || '-'}</div>
+                        </div>
+                      )}
                       <div className="relative group">
                         <div className="text-sm text-gray-400">Entities</div>
                         <div className="font-medium">{entities.length}</div>
@@ -1179,7 +1264,7 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
         connectionString = `Server=localhost;Port=3306;Database=${sanitizedName};Uid=root;Pwd=password;`;
         break;
       case 'SqlServer':
-        connectionString = `Server=localhost;Database=${sanitizedName};User Id=sa;Password=password;TrustServerCertificate=True;`;
+        connectionString = `Server=localhost;Database=${sanitizedName};Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True;`;
         break;
       case 'MongoDB':
         connectionString = `mongodb://localhost:27017/${sanitizedName}`;
@@ -1397,12 +1482,14 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
       // Send to API
       const response = await apiService.generateProject({
         projectName: projectConfig.projectName,
-        projectDescription: projectConfig.projectDescription,
+        projectDescription: projectConfig.projectDescription || 'No description provided',
         technology: projectConfig.technology,
         architecture: projectConfig.architecture,
         designPattern: projectConfig.designPattern,
         database: projectConfig.database,
         connectionString: projectConfig.connectionString,
+        includeFrontend: projectConfig.includeFrontend,
+        ...(projectConfig.includeFrontend && { frontendTechnology: projectConfig.frontendTechnology }),
         entities: apiEntities
       });
       
@@ -2075,6 +2162,50 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
       }
     }
   }, [projectConfig.projectName, projectConfig.database]);
+
+  // Fetch frontend technologies
+  const fetchFrontendTechnologies = async () => {
+    try {
+      const data = await apiService.getFrontendTechnologies();
+      setAvailableFrontendTechnologies(data);
+    } catch (error) {
+      console.error('Error fetching frontend technologies:', error);
+      // Fallback to some defaults if API fails
+      setAvailableFrontendTechnologies([
+        { id: 1, name: 'React', isAvailable: true },
+        { id: 2, name: 'Angular', isAvailable: false }
+      ]);
+    }
+  };
+
+  useEffect(() => {
+    // Immediately fetch technologies
+    fetchTechnologies();
+    
+    // Start with dark theme
+    setIsDarkTheme(true);
+    
+    // Fetch frontend technologies
+    fetchFrontendTechnologies();
+
+    // Initialize entities list
+    setEntities([]);
+  }, []);
+
+  // Handle frontend toggle
+  const handleFrontendToggle = (enabled: boolean) => {
+    setProjectConfig(prev => ({ 
+      ...prev, 
+      includeFrontend: enabled,
+      // Reset frontend technology if disabling
+      frontendTechnology: enabled ? prev.frontendTechnology : ''
+    }));
+  };
+
+  // Handle frontend technology selection
+  const handleFrontendTechnologyChange = (technology: string) => {
+    setProjectConfig(prev => ({ ...prev, frontendTechnology: technology }));
+  };
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDarkTheme ? 'bg-darkGray text-white' : 'bg-gray-100 text-gray-800'}`}>
