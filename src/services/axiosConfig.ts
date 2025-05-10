@@ -4,8 +4,19 @@ import authService from './authService';
 // Setup axios with credentials support for cookies
 axios.defaults.withCredentials = true;
 
-// API URL'i burada sabit olarak tanımlayın - tüm isteklerde kullanılacak
-axios.defaults.baseURL = 'https://localhost:6790';
+// Determine environment-specific base URL
+const getBaseUrl = () => {
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'https://localhost:6790'; // Development
+  } else {
+    return 'https://jetframedev-production.up.railway.app'; // Production
+  }
+};
+
+// Set API URL based on environment
+axios.defaults.baseURL = getBaseUrl();
+console.log('Using API URL:', axios.defaults.baseURL);
 
 // CORS için gerekli header'ları ekle
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
