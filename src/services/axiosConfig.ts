@@ -7,11 +7,14 @@ axios.defaults.withCredentials = true;
 // Determine environment-specific base URL
 const getBaseUrl = () => {
   const hostname = window.location.hostname;
+  
+  // Check if we're in a local development environment
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'https://localhost:6790'; // Development
-  } else {
-    return 'https://jetframedev-production.up.railway.app'; // Production
-  }
+  } 
+  
+  // Production environment - use Railway production URL
+  return 'https://jetframedev-production.up.railway.app';
 };
 
 // Set API URL based on environment
@@ -20,6 +23,9 @@ console.log('Using API URL:', axios.defaults.baseURL);
 
 // CORS için gerekli header'ları ekle
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// Add explicit Origin header for CORS
+axios.defaults.headers.common['Origin'] = window.location.origin;
 
 // Flag to track token refresh status to prevent infinite loops
 let isRefreshing = false;
