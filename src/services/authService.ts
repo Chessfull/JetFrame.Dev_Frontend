@@ -1,9 +1,10 @@
-import axios from 'axios';
+import axios from './axiosConfig';
 import { 
   RegisterRequest, 
   LoginRequest, 
   ExternalAuthCallbackRequest,
-  AuthResponse
+  AuthResponse,
+  UserInfo
 } from '../types/auth';
 
 // API endpoints for authentication
@@ -271,6 +272,55 @@ const authService = {
       return false; // Default to not authenticated until proven otherwise
     } catch (e) {
       return false;
+    }
+  },
+
+  // External auth methods
+  loginWithGoogle: async (): Promise<UserInfo | null> => {
+    try {
+      // Get the current URL to send as return URL
+      const returnUrl = encodeURIComponent(window.location.origin + '/auth/callback');
+      
+      // Redirect to backend for Google authentication
+      const response = await axios.get(`/api/Auth/external-login?provider=Google&returnUrl=${returnUrl}`);
+      
+      if (response.data && response.data.redirectUrl) {
+        // Follow the redirect URL from the API
+        window.location.href = response.data.redirectUrl;
+      } else {
+        // Fallback to direct endpoint in case API doesn't return redirect URL
+        window.location.href = `${axios.defaults.baseURL}/api/Auth/external-login?provider=Google&returnUrl=${returnUrl}`;
+      }
+      
+      console.log('Redirecting to Google login...');
+      return null;
+    } catch (error) {
+      console.error('Error during Google authentication:', error);
+      return null;
+    }
+  },
+
+  loginWithGitHub: async (): Promise<UserInfo | null> => {
+    try {
+      // Get the current URL to send as return URL
+      const returnUrl = encodeURIComponent(window.location.origin + '/auth/callback');
+      
+      // Redirect to backend for GitHub authentication
+      const response = await axios.get(`/api/Auth/external-login?provider=GitHub&returnUrl=${returnUrl}`);
+      
+      if (response.data && response.data.redirectUrl) {
+        // Follow the redirect URL from the API
+        window.location.href = response.data.redirectUrl;
+      } else {
+        // Fallback to direct endpoint in case API doesn't return redirect URL
+        window.location.href = `${axios.defaults.baseURL}/api/Auth/external-login?provider=GitHub&returnUrl=${returnUrl}`;
+      }
+      
+      console.log('Redirecting to GitHub login...');
+      return null;
+    } catch (error) {
+      console.error('Error during GitHub authentication:', error);
+      return null;
     }
   }
 };

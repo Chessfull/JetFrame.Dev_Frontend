@@ -47,4 +47,15 @@ export interface User {
   authProvider: string;
 }
 
+// UserInfo is used for the current user data returned by the auth service
+export interface UserInfo {
+  id: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string;
+  authProvider: string;
+}
+
 export type AuthProviderType = 'Email' | 'Google' | 'GitHub'; 
