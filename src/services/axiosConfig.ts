@@ -21,11 +21,15 @@ const getBaseUrl = () => {
 axios.defaults.baseURL = getBaseUrl();
 console.log('Using API URL:', axios.defaults.baseURL);
 
-// CORS için gerekli header'ları ekle
+// Add headers needed for CORS
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+axios.defaults.headers.common['Access-Control-Allow-Origin'] = window.location.origin;
+axios.defaults.headers.common['Access-Control-Allow-Credentials'] = 'true';
 
 // Add explicit Origin header for CORS
-axios.defaults.headers.common['Origin'] = window.location.origin;
+const origin = window.location.origin;
+axios.defaults.headers.common['Origin'] = origin;
+console.log('Setting Origin header:', origin);
 
 // Flag to track token refresh status to prevent infinite loops
 let isRefreshing = false;
