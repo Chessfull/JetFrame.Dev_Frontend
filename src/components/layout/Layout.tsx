@@ -27,8 +27,17 @@ const Layout = ({ children }: LayoutProps) => {
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.tagName === 'A' || target.tagName === 'BUTTON' || 
-          target.closest('button') || target.closest('a')) {
+      if (
+        target.tagName === 'A' || 
+        target.tagName === 'BUTTON' || 
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.closest('button') || 
+        target.closest('a') ||
+        target.classList.contains('clickable') || 
+        target.closest('.clickable')
+      ) {
         setIsHovering(true);
       } else {
         setIsHovering(false);

@@ -59,7 +59,6 @@ axios.interceptors.response.use(
   async (error) => {
     // Eğer bir istek yapılamadıysa (ağ hatası vs.)
     if (!error.response) {
-      console.error('Network error:', error.message);
       return Promise.reject(error);
     }
     
@@ -98,7 +97,6 @@ axios.interceptors.response.use(
         return axios(originalRequest);
       } catch (refreshError) {
         // If refresh failed, clear local state and redirect
-        console.error('Token refresh failed:', refreshError);
         isRefreshing = false;
         isLoggingOut = true;
         

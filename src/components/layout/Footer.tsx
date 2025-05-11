@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const Footer = () => {
   return (
     <footer className="py-4 border-t border-gray-800 bg-dark-secondary mt-auto">

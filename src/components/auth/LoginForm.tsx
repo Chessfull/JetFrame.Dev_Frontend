@@ -77,10 +77,7 @@ const LoginForm = () => {
       
       // Important: Perform a redirect, not a fetch
       window.location.href = url;
-
-      console.log("URL: ", url);
     } catch (err) {
-      console.error(`${provider} login error:`, err);
       // Error handling
     }
   };

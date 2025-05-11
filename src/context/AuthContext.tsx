@@ -131,15 +131,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           { withCredentials: true }
         );
       } catch (logoutError) {
-        console.error('Backend logout error:', logoutError);
+        // Backend error still counts as logged out
         // Backend hatası yine de kullanıcıyı çıkış yapmış sayıyoruz
       }
       
       // Yönlendirme
       navigate('/login', { replace: true });
     } catch (err) {
-      console.error('Logout error:', err);
-      
       // Even if the backend request fails, clear local data
       setUser(null);
       setIsAuthenticated(false);
@@ -162,7 +160,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       return await authService.getOAuthUrl(provider);
     } catch (err: any) {
-      console.error(`OAuth URL generation error:`, err);
       const errorMsg = err.response?.data?.message || `Failed to get ${provider} authentication URL.`;
       setError(errorMsg);
       throw new Error(errorMsg);
@@ -180,7 +177,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authService.handleOAuthCallback(params);
       handleAuthResponse(response);
     } catch (err: any) {
-      console.error('OAuth callback handling error in AuthContext:', err);
       let errorMsg = 'Authentication failed. Please try again.';
       
       if (err.response?.data?.message) {
@@ -202,7 +198,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const { accessToken, refreshToken, expiresAt, ...userInfo } = response;
     setUser(userInfo);
     setIsAuthenticated(true);
-    navigate('/');
+    
+    // Get the stored location from sessionStorage if available
+    const storedLocation = sessionStorage.getItem('redirectAfterLogin');
+    
+    if (storedLocation && storedLocation !== '/') {
+      sessionStorage.removeItem('redirectAfterLogin');
+      navigate(storedLocation);
+    } else {
+      navigate('/');
+    }
   };
 
   // Clear any error message
@@ -217,7 +222,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const redirectUrl = await authService.getOAuthUrl(provider);
       window.location.href = redirectUrl;
     } catch (err: any) {
-      console.error(`${provider} login error:`, err);
       const errorMessage = err.response?.data?.message || `${provider} login failed. Please try again.`;
       setError(errorMessage);
       setLoading(false);

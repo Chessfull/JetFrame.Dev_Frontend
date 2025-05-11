@@ -82,7 +82,6 @@ const authService = {
       );
       return response.data;
     } catch (error) {
-      console.error('Registration error:', error);
       throw error;
     }
   },
@@ -90,8 +89,6 @@ const authService = {
   // Login with email and password
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
-      console.log('Attempting login with:', {...credentials, password: '********'});
-      
       const response = await axios.post(
         AUTH_ENDPOINTS.login, 
         credentials,
@@ -104,15 +101,8 @@ const authService = {
         }
       );
       
-      console.log('Login response status:', response.status);
-      console.log('Login success for:', credentials.email);
       return response.data;
     } catch (error) {
-      console.error('Login error:', error);
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
-      }
       throw error;
     }
   },
@@ -127,7 +117,6 @@ const authService = {
       );
       return response.data;
     } catch (error) {
-      console.error('Token refresh error:', error);
       throw error;
     }
   },
@@ -143,11 +132,9 @@ const authService = {
     } catch (error) {
       // Don't throw error on 401 - it just means we're already logged out
       if (axios.isAxiosError(error) && error.response?.status !== 401) {
-        console.error('Logout error:', error);
         throw error;
-      } else {
-        console.log('Logout completed (token already expired)');
       }
+      // Already logged out
     } finally {
       // Always clear any local auth state regardless of API response
       // Add any local state cleanup here if needed
@@ -173,7 +160,6 @@ const authService = {
         url = `${AUTH_ENDPOINTS.getOAuthUrl}?provider=${provider}&returnUrl=${encodeURIComponent(redirectUri)}&state=${state}`;
       }
       
-      console.log(`Requesting OAuth URL for ${provider} with redirect to ${redirectUri}`);
       const response = await axios.get(url, { withCredentials: true });
       
       // Store the state from backend if provided
@@ -181,14 +167,8 @@ const authService = {
         sessionStorage.setItem('oauth_state', response.data.state);
       }
       
-      // Log the redirect URL for debugging
-      if (isDevelopment()) {
-        console.log(`Got OAuth URL for ${provider}:`, response.data.redirectUrl);
-      }
-      
       return response.data.redirectUrl;
     } catch (error) {
-      console.error(`${provider} OAuth URL error:`, error);
       throw error;
     }
   },
@@ -212,8 +192,6 @@ const authService = {
         
         return response.data;
       } catch (err) {
-        console.error('Primary OAuth handling failed, trying alternative endpoint', err);
-        
         // Alternative: Use backend's dedicated GitHub direct auth endpoint as a fallback
         if (params.provider.toLowerCase() === 'github') {
           const response = await axios.post(
@@ -229,11 +207,7 @@ const authService = {
         throw err;
       }
     } catch (error) {
-      console.error('OAuth callback error:', error);
-      
       if (axios.isAxiosError(error) && error.response) {
-        console.error('Response data:', error.response?.data);
-        console.error('Response status:', error.response?.status);
         throw new Error(`Authentication failed: ${error.response?.data?.message || error.message}`);
       }
       
@@ -256,7 +230,6 @@ const authService = {
       });
       return response.data;
     } catch (error) {
-      console.error('Get user info error:', error);
       // Yetkilendirme hatası ise, sessiz hata ver ki sürekli popup çıkmasın
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         return null;
@@ -292,10 +265,8 @@ const authService = {
         window.location.href = `${axios.defaults.baseURL}/api/Auth/external-login?provider=Google&returnUrl=${returnUrl}`;
       }
       
-      console.log('Redirecting to Google login...');
       return null;
     } catch (error) {
-      console.error('Error during Google authentication:', error);
       return null;
     }
   },
@@ -316,10 +287,8 @@ const authService = {
         window.location.href = `${axios.defaults.baseURL}/api/Auth/external-login?provider=GitHub&returnUrl=${returnUrl}`;
       }
       
-      console.log('Redirecting to GitHub login...');
       return null;
     } catch (error) {
-      console.error('Error during GitHub authentication:', error);
       return null;
     }
   }

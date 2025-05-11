@@ -13,7 +13,7 @@ const Navbar = () => {
       await logout();
       navigate('/login');
     } catch (error) {
-      console.error('Logout failed:', error);
+      // Logout failed silently
     }
   };
 
@@ -77,7 +77,17 @@ const Navbar = () => {
                 >
                   <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center mr-2 text-sm font-medium">
                     {user?.avatarUrl ? (
-                      <img src={user.avatarUrl} alt="Avatar" className="h-8 w-8 rounded-full" />
+                      <img 
+                        src={user.avatarUrl} 
+                        alt="Avatar" 
+                        className="h-8 w-8 rounded-full" 
+                        onError={(e) => {
+                          e.currentTarget.onerror = null; // Prevent infinite loop
+                          e.currentTarget.style.display = 'none'; // Hide the img element
+                          e.currentTarget.parentElement.classList.add('flex', 'items-center', 'justify-center'); // Ensure proper styling for fallback
+                          e.currentTarget.parentElement.textContent = user?.firstName?.charAt(0)?.toUpperCase() || 'U';
+                        }}
+                      />
                     ) : (
                       user?.firstName?.charAt(0)?.toUpperCase() || 'U'
                     )}

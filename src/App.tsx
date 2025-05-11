@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Layout
-import Navbar from './components/layout/Navbar';
+import Layout from './components/layout/Layout';
 import Footer from './components/layout/Footer';
 
 // Pages
@@ -30,8 +30,7 @@ const AboutPage = () => (
 
 function App() {
   return (
-    <div className="flex flex-col min-h-screen bg-dark text-white">
-      <Navbar />
+    <Layout>
       <main className="flex-grow">
         <Routes>
           {/* Public Routes */}
@@ -51,7 +50,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
-    </div>
+    </Layout>
   );
 }
 

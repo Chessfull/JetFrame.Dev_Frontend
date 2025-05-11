@@ -87,7 +87,6 @@ const RegisterForm = () => {
       // Redirect is handled in the AuthContext after successful registration
     } catch (err) {
       // Error handling is done in the AuthContext
-      console.error('Registration error:', err);
     }
   };
 
@@ -97,7 +96,7 @@ const RegisterForm = () => {
       const url = await getOAuthUrl(provider);
       window.location.href = url;
     } catch (err) {
-      console.error(`${provider} registration error:`, err);
+      // Error handling is done in the AuthContext
     }
   };
 

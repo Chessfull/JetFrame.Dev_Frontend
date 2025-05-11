@@ -36,6 +36,10 @@ const ProtectedRoute = ({ children, requireAuth = true }: ProtectedRouteProps) =
 
   // If requireAuth is true but user is not authenticated, redirect to login
   if (requireAuth && !isAuthenticated) {
+    // Store current path for redirect after login
+    const redirectPath = location.pathname + location.search;
+    sessionStorage.setItem('redirectAfterLogin', redirectPath);
+    
     // Prevent rapid redirects
     const currentTime = Date.now();
     if (currentTime - lastNavigationTime > 2000) {

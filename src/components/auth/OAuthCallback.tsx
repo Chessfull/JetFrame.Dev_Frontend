@@ -40,13 +40,6 @@ const OAuthCallback = () => {
         const state = searchParams.get('state');
         const errorParam = searchParams.get('error');
 
-        
-        console.log("Processing OAuth callback with:", { 
-          provider, 
-          code: code ? `${code.substring(0, 5)}...` : 'null', 
-          state: state ? `${state.substring(0, 5)}...` : 'null'
-        });
-
         // Retrieve the stored state from session storage
         const storedState = sessionStorage.getItem('oauth_state');
         
@@ -71,12 +64,9 @@ const OAuthCallback = () => {
           return;
         }
 
-        // Optional state verification - log any mismatch but proceed anyway
+        // Optional state verification - proceed even if mismatch
         if (storedState && state && state !== storedState) {
-          console.warn('OAuth state mismatch, potential CSRF risk', { 
-            stored: storedState, 
-            received: state 
-          });
+          // State mismatch - potential security risk but we'll proceed
         }
 
         // Normalize provider name for backend
@@ -85,8 +75,6 @@ const OAuthCallback = () => {
         // Create the correct redirect URI based on current environment
         const origin = window.location.origin;
         const redirectUri = `${origin}/auth/${provider.toLowerCase()}/callback`;
-
-        console.log(`Sending OAuth callback to backend for ${normalizedProvider} with redirect URI: ${redirectUri}`);
         
         // Process the OAuth callback through backend service
         await handleOAuthCallback({
@@ -99,11 +87,16 @@ const OAuthCallback = () => {
         // Clear the state from session storage
         sessionStorage.removeItem('oauth_state');
         
-        // Navigate to home on success
-        navigate('/', { replace: true });
+        // Check for stored redirect location
+        const storedLocation = sessionStorage.getItem('redirectAfterLogin');
+        if (storedLocation && storedLocation !== '/') {
+          sessionStorage.removeItem('redirectAfterLogin');
+          navigate(storedLocation, { replace: true });
+        } else {
+          // Navigate to home on success if no redirect location
+          navigate('/', { replace: true });
+        }
       } catch (err) {
-        console.error('OAuth callback error:', err);
-        
         if (err instanceof Error) {
           // Check for specific error types
           if (err.message.includes('bad_verification_code') || err.message.includes('already been used')) {

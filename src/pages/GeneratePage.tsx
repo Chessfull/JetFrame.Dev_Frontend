@@ -280,17 +280,16 @@ const GeneratePage = () => {
     try {
       const data = await apiService.getTechnologies();
       
-      // Enrich technology data with details
-      const enrichedData = data.map((tech: Technology) => ({
+      // Enrich with metadata for UI presentation
+      const enrichedData = data.map((tech: any) => ({
         ...tech,
-        icon: technologyDetails[tech.name]?.icon || '🔧',
-        description: technologyDetails[tech.name]?.description || 'A powerful development technology.',
-        popularity: technologyDetails[tech.name]?.popularity || 70
+        icon: tech.name === 'DotNet' ? '🟣' : tech.name === 'Java' ? '☕' : '🟢',
+        description: tech.description || `${tech.name} framework for building modern applications.`,
+        popularity: tech.popularity || (Math.random() * 30) + 70 // random popularity between 70-100
       }));
       
       setAvailableTechnologies(enrichedData);
     } catch (error) {
-      console.error('Error fetching technologies:', error);
       // Set default values if API fails
       setAvailableTechnologies([
         { 
@@ -315,7 +314,7 @@ const GeneratePage = () => {
         setAvailableArchitectures(data);
         setProjectConfig(prev => ({ ...prev, architecture: '' })); // Reset architecture when technology changes
       } catch (error) {
-        console.error('Error fetching architectures:', error);
+        // Handle error gracefully
       }
     };
 
@@ -332,7 +331,7 @@ const GeneratePage = () => {
         setAvailablePatterns(data);
         setProjectConfig(prev => ({ ...prev, designPattern: '' })); // Reset pattern when architecture changes
       } catch (error) {
-        console.error('Error fetching patterns:', error);
+        // Handle error gracefully
       }
     };
 
@@ -349,7 +348,7 @@ const GeneratePage = () => {
         setAvailableDatabases(data);
         setProjectConfig(prev => ({ ...prev, database: '' })); // Reset database when technology changes
       } catch (error) {
-        console.error('Error fetching databases:', error);
+        // Handle error gracefully
       }
     };
 
@@ -1511,7 +1510,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
         }, 2000); // Check every 2 seconds
       }
     } catch (error) {
-      console.error('Error generating project:', error);
       setIsLoading(false);
       setGenerationStatus('error');
       setGenerationMessage('An error occurred while generating the project. Please try again.');
@@ -2086,7 +2084,8 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
   const fetchFrontendTechnologies = async () => {
     try {
       const data = await apiService.getFrontendTechnologies();
-      // Make sure React is always available regardless of what the API returns
+      
+      // Mark React as available and others as not available for now
       const updatedData = data.map(tech => {
         if (tech.name === 'React') {
           return { ...tech, isAvailable: true };
@@ -2095,7 +2094,6 @@ module.exports = mongoose.model('${entity.name}', ${entity.name.charAt(0).toLowe
       });
       setAvailableFrontendTechnologies(updatedData);
     } catch (error) {
-      console.error('Error fetching frontend technologies:', error);
       // Fallback to some defaults if API fails
       setAvailableFrontendTechnologies([
         { id: 1, name: 'React', isAvailable: true },

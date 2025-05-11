@@ -17,6 +17,18 @@
   --color-dark-gray: #2A2A2A;
 }
 
+/* Hide default cursor when using custom cursor */
+html, body, a, button, input, textarea, select, [role="button"], .clickable,
+input:hover, a:hover, button:hover, textarea:hover, select:hover {
+  cursor: none;
+  scroll-behavior: smooth;
+}
+
+/* Keep scroll behavior only for html */
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   @apply bg-dark text-white;
@@ -25,6 +37,75 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Custom cursor styles for logo */
+.custom-cursor {
+  pointer-events: none;
+  position: fixed;
+  z-index: 9999;
+  transform-origin: center;
+  transition: transform 0.15s ease-out;
+}
+
+.custom-cursor img {
+  filter: drop-shadow(0 0 8px rgba(255, 107, 0, 0.6));
+}
+
+/* Custom cursor trail effect */
+.custom-cursor::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 107, 0, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.6;
+  transition: width 0.3s, height 0.3s, opacity 0.3s;
+  z-index: -1;
+  filter: blur(8px);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 0.15;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+}
+
+/* Enhanced wing animation for floating wings */
+@keyframes float-plane {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-12px) rotate(-3deg); }
+  50% { transform: translateY(-6px) rotate(0deg); }
+  75% { transform: translateY(6px) rotate(3deg); }
+}
+
+/* But ensure cursor works on mobile devices */
+@media (max-width: 768px) {
+  html {
+    cursor: auto;
+  }
+  
+  body {
+    cursor: auto;
+  }
+  
+  .custom-cursor {
+    display: none;
+  }
 }
 
 #root {
@@ -75,7 +156,6 @@ main {
 @layer base {
   html {
     @apply text-white bg-dark;
-    scroll-behavior: smooth;
   }
 
   body {
@@ -137,9 +217,9 @@ main {
   }
 }
 
-/* Custom animations */
-@keyframes float-plane {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-6px) rotate(-2deg); }
-  75% { transform: translateY(6px) rotate(2deg); }
+/* Wing wrapper styles */
+.wing-wrapper {
+  position: relative;
+  filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.4));
+  transform-origin: center;
 }

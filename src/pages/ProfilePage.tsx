@@ -1,14 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiService } from '../services/api';
+
+// Define the UserProjectHistory type
+interface UserProjectHistory {
+  id: string;
+  projectConfigId: string;
+  projectName: string;
+  projectDescription: string;
+  technology: string;
+  architecture: string;
+  designPattern: string;
+  database: string;
+  includedFrontend: boolean;
+  frontendTechnology: string;
+  entityCount: number;
+  downloadedAt: string;
+}
 
 const ProfilePage = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [projectHistory, setProjectHistory] = useState<UserProjectHistory[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || ''
   });
+
+  // Fetch project history when component mounts
+  useEffect(() => {
+    const fetchProjectHistory = async () => {
+      if (user) {
+        setIsLoading(true);
+        try {
+          const history = await apiService.getUserProjectHistory();
+          setProjectHistory(history);
+        } catch (error) {
+          // Error handling
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchProjectHistory();
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -22,6 +60,41 @@ const ProfilePage = () => {
     e.preventDefault();
     // TODO: Implement profile update functionality
     setIsEditing(false);
+  };
+
+  const handleDeleteHistory = async (historyId: string) => {
+    if (confirm('Are you sure you want to delete this project from your history?')) {
+      try {
+        await apiService.deleteProjectHistory(historyId);
+        setProjectHistory(prevHistory => 
+          prevHistory.filter(item => item.id !== historyId)
+        );
+      } catch (error) {
+        // Error handling
+      }
+    }
+  };
+
+  const handleDownloadAgain = (configId: string, projectName: string) => {
+    // Create a temporary anchor element to trigger the download
+    const link = document.createElement('a');
+    link.href = apiService.downloadProject(configId);
+    link.download = `${projectName}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
   };
 
   return (
@@ -38,6 +111,15 @@ const ProfilePage = () => {
                   src={user.avatarUrl} 
                   alt="Profile" 
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null; // Prevent infinite loop
+                    e.currentTarget.style.display = 'none'; // Hide the img element
+                    e.currentTarget.parentElement.classList.add('flex', 'items-center', 'justify-center', 'bg-primary');
+                    const initialElement = document.createElement('div');
+                    initialElement.className = "text-4xl font-bold";
+                    initialElement.textContent = user?.firstName?.charAt(0)?.toUpperCase() || 'U';
+                    e.currentTarget.parentElement.appendChild(initialElement);
+                  }}
                 />
               ) : (
                 <div className="w-full h-full bg-primary flex items-center justify-center text-4xl font-bold">
@@ -120,10 +202,6 @@ const ProfilePage = () => {
                       <label className="block text-gray-400 text-sm">Email</label>
                       <p className="text-lg">{user?.email || 'N/A'}</p>
                     </div>
-                    <div>
-                      <label className="block text-gray-400 text-sm">User ID</label>
-                      <p className="text-sm text-gray-500 truncate">{user?.id || 'N/A'}</p>
-                    </div>
                   </div>
                 </div>
                 
@@ -139,6 +217,89 @@ const ProfilePage = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Project History Section */}
+      <div className="bg-dark-secondary rounded-lg shadow-lg p-6 mt-8">
+        <h2 className="text-2xl font-bold mb-6">Your Project History</h2>
+        
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-400">Loading your project history...</p>
+          </div>
+        ) : projectHistory.length === 0 ? (
+          <div className="text-center py-8 border border-dashed border-gray-700 rounded-lg">
+            <svg className="w-16 h-16 mx-auto text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="mt-4 text-lg text-gray-400">No projects found in your history</p>
+            <p className="text-sm text-gray-500">Generate a project to see it here</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-700">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Project</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Technology</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Architecture</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-800">
+                  {projectHistory.map((project) => (
+                    <tr key={project.id} className="hover:bg-gray-800/50">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div>
+                            <div className="text-sm font-medium text-white">{project.projectName}</div>
+                            <div className="text-xs text-gray-400">{project.entityCount} entities</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-300">{project.technology}</div>
+                        <div className="text-xs text-gray-500">{project.database}</div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-300">{project.architecture}</div>
+                        <div className="text-xs text-gray-500">{project.designPattern}</div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {formatDate(project.downloadedAt)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => handleDownloadAgain(project.projectConfigId, project.projectName)}
+                            className="text-primary hover:text-secondary"
+                            title="Download project again"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteHistory(project.id)}
+                            className="text-red-500 hover:text-red-400"
+                            title="Remove from history"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Account Settings Section */}
