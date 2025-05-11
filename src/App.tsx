@@ -12,21 +12,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import OAuthCallback from './components/auth/OAuthCallback';
-
-// Placeholder pages until they're implemented
-const DocumentsPage = () => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold mb-6">Documents</h1>
-    <p>Documentation and resources will be available here.</p>
-  </div>
-);
-
-const AboutPage = () => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold mb-6">About Us</h1>
-    <p>Information about JetFrame.Dev will be available here.</p>
-  </div>
-);
+import AboutYouPage from './pages/AboutYouPage';
+import DocumentationPage from './pages/DocumentationPage';
 
 function App() {
   return (
@@ -35,14 +22,14 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/about" element={<AboutYouPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/:provider/callback" element={<OAuthCallback />} />
           
           {/* Protected Routes */}
           <Route path="/generate" element={<ProtectedRoute><GeneratePage /></ProtectedRoute>} />
-          <Route path="/documents" element={<ProtectedRoute><DocumentsPage /></ProtectedRoute>} />
+          <Route path="/documents" element={<DocumentationPage />} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           
           {/* Fallback route */}
