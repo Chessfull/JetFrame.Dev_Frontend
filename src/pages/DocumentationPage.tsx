@@ -621,7 +621,7 @@ const DocumentationPage = () => {
               <div className="text-xs text-gray-400">{language || 'code'}</div>
             </div>
           </div>);
-          formattedContent.push(<pre key={`code-block-${index}`} className="bg-dark rounded-b-md p-4 overflow-x-auto border-b border-x border-gray-700 text-sm font-mono text-gray-300">
+          formattedContent.push(<pre key={`code-block-${index}`} className="bg-dark rounded-b-md p-4 overflow-x-auto border-b border-x border-gray-700 text-sm font-mono text-gray-300 whitespace-pre-wrap break-words md:whitespace-pre">
             <code></code>
           </pre>);
         }
@@ -633,7 +633,7 @@ const DocumentationPage = () => {
         const lastElement = formattedContent[formattedContent.length - 1];
         const codeContent = lastElement.props.children.props.children || '';
         formattedContent[formattedContent.length - 1] = (
-          <pre key={`code-block-${lastElement.key}`} className="bg-dark rounded-b-md p-4 overflow-x-auto border-b border-x border-gray-700 text-sm font-mono text-gray-300">
+          <pre key={`code-block-${lastElement.key}`} className="bg-dark rounded-b-md p-4 overflow-x-auto border-b border-x border-gray-700 text-sm font-mono text-gray-300 whitespace-pre-wrap break-words md:whitespace-pre">
             <code>{codeContent + line + '\n'}</code>
           </pre>
         );
@@ -642,15 +642,15 @@ const DocumentationPage = () => {
       
       // Headers
       if (line.startsWith('# ')) {
-        formattedContent.push(<h1 key={`h1-${index}`} className="text-3xl font-bold mb-6 text-white">{line.replace('# ', '')}</h1>);
+        formattedContent.push(<h1 key={`h1-${index}`} className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-white">{line.replace('# ', '')}</h1>);
         return;
       }
       if (line.startsWith('## ')) {
-        formattedContent.push(<h2 key={`h2-${index}`} className="text-2xl font-bold mt-8 mb-4 text-white">{line.replace('## ', '')}</h2>);
+        formattedContent.push(<h2 key={`h2-${index}`} className="text-xl md:text-2xl font-bold mt-6 md:mt-8 mb-3 md:mb-4 text-white">{line.replace('## ', '')}</h2>);
         return;
       }
       if (line.startsWith('### ')) {
-        formattedContent.push(<h3 key={`h3-${index}`} className="text-xl font-bold mt-6 mb-3 text-white">{line.replace('### ', '')}</h3>);
+        formattedContent.push(<h3 key={`h3-${index}`} className="text-lg md:text-xl font-bold mt-5 md:mt-6 mb-2 md:mb-3 text-white">{line.replace('### ', '')}</h3>);
         return;
       }
       
@@ -665,12 +665,12 @@ const DocumentationPage = () => {
           const description = content.substring(colonIndex + 1);
           
           formattedContent.push(
-            <li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-disc">
+            <li key={`li-${index}`} className="ml-4 md:ml-6 text-gray-300 mb-2 list-disc">
               <span className="font-bold">{term}</span>:{description}
             </li>
           );
         } else {
-          formattedContent.push(<li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-disc">{content}</li>);
+          formattedContent.push(<li key={`li-${index}`} className="ml-4 md:ml-6 text-gray-300 mb-2 list-disc">{content}</li>);
         }
         return;
       }
@@ -686,24 +686,24 @@ const DocumentationPage = () => {
           const description = content.substring(colonIndex + 1);
           
           formattedContent.push(
-            <li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-decimal">
+            <li key={`li-${index}`} className="ml-4 md:ml-6 text-gray-300 mb-2 list-decimal">
               <span className="font-bold">{term}</span>:{description}
             </li>
           );
         } else {
-          formattedContent.push(<li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-decimal">{content}</li>);
+          formattedContent.push(<li key={`li-${index}`} className="ml-4 md:ml-6 text-gray-300 mb-2 list-decimal">{content}</li>);
         }
         return;
       }
       
       // Empty lines
       if (line.trim() === '') {
-        formattedContent.push(<div key={`empty-${index}`} className="h-4"></div>);
+        formattedContent.push(<div key={`empty-${index}`} className="h-3 md:h-4"></div>);
         return;
       }
       
       // Regular paragraph
-      formattedContent.push(<p key={`p-${index}`} className="text-gray-300 mb-4">{line}</p>);
+      formattedContent.push(<p key={`p-${index}`} className="text-gray-300 mb-3 md:mb-4 text-sm md:text-base">{line}</p>);
     });
     
     return formattedContent;
@@ -730,27 +730,28 @@ const DocumentationPage = () => {
         </div>
       </div>
       
-      <div className="container-fluid max-w-7xl mx-auto px-4 py-12 relative z-10">
+      <div className="container-fluid max-w-7xl mx-auto px-4 py-6 md:py-12 relative z-10">
         {/* Header */}
-        <div className="mb-8 md:mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+        <div className="mb-6 md:mb-16">
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">
             <span className="text-white">Documentation</span>
           </h1>
-          <p className="text-xl text-gray-300">
+          <p className="text-lg md:text-xl text-gray-300">
             Everything you need to know about using JetFrame.Dev
           </p>
         </div>
         
-        {/* Mobile menu button */}
+        {/* Mobile menu button - improved styling */}
         <div className="block md:hidden mb-6">
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="flex items-center px-4 py-2 rounded bg-dark-secondary border border-gray-700 text-white"
+            className="flex w-full items-center justify-between px-4 py-3 rounded bg-dark-secondary border border-gray-700 text-white"
+            aria-expanded={isMobileMenuOpen ? "true" : "false"}
           >
-            <span>{isMobileMenuOpen ? 'Hide Menu' : 'Show Menu'}</span>
+            <span className="font-medium">{isMobileMenuOpen ? 'Hide Menu' : 'Documentation Menu'}</span>
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className={`ml-2 h-5 w-5 transition-transform ${isMobileMenuOpen ? 'rotate-180' : ''}`} 
+              className={`ml-2 h-5 w-5 transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-180' : ''}`} 
               viewBox="0 0 20 20" 
               fill="currentColor"
             >
@@ -760,12 +761,12 @@ const DocumentationPage = () => {
         </div>
         
         <div className="flex flex-col md:flex-row">
-          {/* Sidebar */}
-          <div className={`w-full md:w-64 flex-shrink-0 md:pr-8 ${isMobileMenuOpen ? 'block' : 'hidden'} md:block`}>
-            <div className="sticky top-24 overflow-y-auto custom-scrollbar max-h-[calc(100vh-120px)]">
+          {/* Sidebar - improved mobile sidebar */}
+          <div className={`w-full md:w-64 flex-shrink-0 md:pr-8 ${isMobileMenuOpen ? 'block' : 'hidden'} md:block mb-8 md:mb-0`}>
+            <div className="md:sticky md:top-24 overflow-y-auto custom-scrollbar max-h-[calc(100vh-120px)]">
               <nav>
                 {docsSections.map(section => (
-                  <div key={section.id} className="mb-6">
+                  <div key={section.id} className="mb-4 md:mb-6">
                     <button
                       onClick={() => {
                         setActiveSection(section.id);
@@ -808,10 +809,10 @@ const DocumentationPage = () => {
               </nav>
               
               {/* Back to Generate button */}
-              <div className="mt-10 border-t border-gray-800 pt-6">
+              <div className="mt-6 md:mt-10 border-t border-gray-800 pt-6">
                 <Link 
                   to="/generate" 
-                  className="flex items-center justify-center w-full py-2 px-4 border border-primary text-primary rounded-md hover:bg-primary hover:bg-opacity-10 transition duration-200"
+                  className="flex items-center justify-center w-full py-3 md:py-2 px-4 border border-primary text-primary rounded-md hover:bg-primary hover:bg-opacity-10 transition duration-200"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
@@ -822,11 +823,11 @@ const DocumentationPage = () => {
             </div>
           </div>
           
-          {/* Main content */}
+          {/* Main content - improved mobile styling */}
           <div className="flex-grow">
-            <div className="bg-dark-secondary rounded-lg border border-gray-800 p-8">
-              {/* Breadcrumb */}
-              <div className="flex items-center text-sm text-gray-400 mb-6">
+            <div className="bg-dark-secondary rounded-lg border border-gray-800 p-4 md:p-8">
+              {/* Breadcrumb - hidden on smallest screens */}
+              <div className="hidden sm:flex items-center text-sm text-gray-400 mb-6">
                 <span>Documentation</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -838,13 +839,20 @@ const DocumentationPage = () => {
                 <span className="text-primary">{docsSections.find(s => s.id === activeSection)?.subsections.find(s => s.id === activeSubsection)?.title}</span>
               </div>
               
-              {/* Content */}
+              {/* Mobile section title - only shows on mobile */}
+              <div className="block sm:hidden mb-6">
+                <h2 className="text-xl font-medium text-primary">
+                  {docsSections.find(s => s.id === activeSection)?.subsections.find(s => s.id === activeSubsection)?.title}
+                </h2>
+              </div>
+              
+              {/* Content - improved code block display on mobile */}
               <div className="docs-content">
                 {formatContent(getActiveContent())}
               </div>
               
-              {/* Bottom navigation */}
-              <div className="flex justify-between items-center mt-16 pt-8 border-t border-gray-800">
+              {/* Bottom navigation - improved for touch */}
+              <div className="flex justify-between items-center mt-10 md:mt-16 pt-6 md:pt-8 border-t border-gray-800">
                 <div>
                   {getPreviousLink()}
                 </div>
@@ -872,12 +880,13 @@ const DocumentationPage = () => {
       return (
         <button
           onClick={() => setActiveSubsection(prevSubsection.id)}
-          className="flex items-center text-sm text-gray-300 hover:text-primary transition-colors"
+          className="flex items-center text-sm text-gray-300 hover:text-primary transition-colors py-2 px-3"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {prevSubsection.title}
+          <span className="hidden sm:inline">{prevSubsection.title}</span>
+          <span className="inline sm:hidden">Previous</span>
         </button>
       );
     }
@@ -892,12 +901,13 @@ const DocumentationPage = () => {
             setActiveSection(prevSection.id);
             setActiveSubsection(prevSubsection.id);
           }}
-          className="flex items-center text-sm text-gray-300 hover:text-primary transition-colors"
+          className="flex items-center text-sm text-gray-300 hover:text-primary transition-colors py-2 px-3"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          {prevSubsection.title}
+          <span className="hidden sm:inline">{prevSubsection.title}</span>
+          <span className="inline sm:hidden">Previous</span>
         </button>
       );
     }
@@ -918,9 +928,10 @@ const DocumentationPage = () => {
       return (
         <button
           onClick={() => setActiveSubsection(nextSubsection.id)}
-          className="flex items-center text-sm text-gray-300 hover:text-primary transition-colors"
+          className="flex items-center text-sm text-gray-300 hover:text-primary transition-colors py-2 px-3"
         >
-          {nextSubsection.title}
+          <span className="hidden sm:inline">{nextSubsection.title}</span>
+          <span className="inline sm:hidden">Next</span>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -938,9 +949,10 @@ const DocumentationPage = () => {
             setActiveSection(nextSection.id);
             setActiveSubsection(nextSubsection.id);
           }}
-          className="flex items-center text-sm text-gray-300 hover:text-primary transition-colors"
+          className="flex items-center text-sm text-gray-300 hover:text-primary transition-colors py-2 px-3"
         >
-          {nextSubsection.title}
+          <span className="hidden sm:inline">{nextSubsection.title}</span>
+          <span className="inline sm:hidden">Next</span>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

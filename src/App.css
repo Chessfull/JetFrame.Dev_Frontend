@@ -230,3 +230,73 @@ section.min-h-screen > .container-fluid {
 .bg-\[\#1e1e1e\] {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 640px) {
+  /* Improve touch targets for mobile */
+  button, 
+  .clickable,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Hide custom cursor on mobile */
+  .custom-cursor {
+    display: none !important;
+  }
+  
+  /* Adjust padding for mobile */
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Improve form inputs on mobile */
+  input, 
+  select, 
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom */
+    padding: 0.75rem !important;
+  }
+
+  /* Better spacing for stacked elements */
+  .flex-col > * + * {
+    margin-top: 0.75rem;
+  }
+  
+  /* Code blocks improvements */
+  pre {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Ensure buttons are properly sized for touch */
+  .btn, 
+  button[type="submit"],
+  button[type="button"] {
+    padding: 0.75rem 1rem;
+  }
+  
+  /* Fix for fixed position elements */
+  .fixed {
+    position: fixed !important;
+  }
+}
+
+/* Medium screens (tablets) */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .custom-cursor {
+    transform: scale(0.7);
+  }
+}
+
+/* Fix viewport height issues on mobile browsers */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+html {
+  height: -webkit-fill-available;
+}
