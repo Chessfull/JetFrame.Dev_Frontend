@@ -19,11 +19,11 @@ JetFrame.Dev is a powerful project generator designed to accelerate your develop
 
 ## Core Features
 
-- **Technology Selection**: Choose from multiple technology stacks
-- **Architecture Selection**: Select the architecture pattern that best fits your project
-- **Database Integration**: Easily connect to your preferred database technology
-- **Frontend Options**: Add frontend frameworks to create full-stack applications
-- **Customization**: Configure project specifics to match your exact needs
+- Technology Selection: Choose from multiple technology stacks
+- Architecture Selection: Select the architecture pattern that best fits your project
+- Database Integration: Easily connect to your preferred database technology
+- Frontend Options: Add frontend frameworks to create full-stack applications
+- Customization: Configure project specifics to match your exact needs
         `
       },
       {
@@ -34,12 +34,12 @@ JetFrame.Dev is a powerful project generator designed to accelerate your develop
 
 Getting your first project generated with JetFrame.Dev is simple:
 
-1. **Navigate to Generate**: Click the "Generate" button in the navigation bar
-2. **Select Technology**: Choose your preferred backend technology (e.g., .NET, Java)
-3. **Select Architecture**: Pick an architectural pattern (e.g., Clean Architecture, Layered)
-4. **Configure Database**: Select and configure your database
-5. **Add Frontend (Optional)**: Include a frontend framework if desired
-6. **Generate and Download**: Click "Generate" to create your project and download it
+1. Navigate to Generate: Click the "Generate" button in the navigation bar
+2. Select Technology: Choose your preferred backend technology (e.g., .NET, Java)
+3. Select Architecture: Pick an architectural pattern (e.g., Clean Architecture, Layered)
+4. Configure Database: Select and configure your database
+5. Add Frontend (Optional): Include a frontend framework if desired
+6. Generate and Download: Click "Generate" to create your project and download it
 
 That's it! You now have a complete, production-ready project structure that follows best practices.
         `
@@ -61,11 +61,11 @@ JetFrame.Dev offers comprehensive support for .NET-based projects, allowing you 
 
 ## Features
 
-- **.NET 9+ Support**: Leverage the latest features of .NET
-- **API Templates**: Create REST APIs with proper structure and documentation
-- **Clean Architecture**: Generate projects with Clean Architecture pattern
-- **Entity Framework Core**: Integrated database access with EF Core
-- **Identity Integration**: Ready-to-use authentication and authorization
+- NET 9+ Support: Leverage the latest features of .NET
+- API Templates: Create REST APIs with proper structure and documentation
+- Clean Architecture: Generate projects with Clean Architecture pattern
+- Entity Framework Core: Integrated database access with EF Core
+- Identity Integration: Ready-to-use authentication and authorization
 
 ## Generated Project Structure
 
@@ -94,11 +94,11 @@ JetFrame.Dev provides robust support for Java-based project generation, making i
 
 ## Features
 
-- **Spring Boot Support**: Generate Spring Boot applications with proper configuration
-- **Maven/Gradle Integration**: Choose your preferred build system
-- **Hibernate ORM**: Database access with the powerful Hibernate ORM
-- **Spring Security**: Integrated authentication and authorization
-- **RESTful APIs**: Create API endpoints following best practices
+- Spring Boot Support: Generate Spring Boot applications with proper configuration
+- Maven/Gradle Integration: Choose your preferred build system
+- Hibernate ORM: Database access with the powerful Hibernate ORM
+- Spring Security: Integrated authentication and authorization
+- RESTful APIs: Create API endpoints following best practices
 
 ## Generated Project Structure
 
@@ -122,6 +122,53 @@ YourProject/
         `
       },
       {
+        id: 'nodejs',
+        title: 'Node.js',
+        content: `
+# Node.js Integration
+
+JetFrame.Dev delivers powerful support for Node.js-based project generation, helping you create well-structured and maintainable applications.
+
+## Features
+
+- Express Framework: Generate Express-based applications with proper structure
+- TypeScript Support: Built with TypeScript for strong typing and better developer experience
+- MongoDB/PostgreSQL Integration: Easy database connectivity with popular databases
+- Authentication System: JWT and OAuth 2.0 authentication options built-in
+- API Documentation: Swagger/OpenAPI documentation generation
+
+## Generated Project Structure
+
+Your generated Node.js project will include:
+
+\`\`\`
+YourProject/
+├── src/
+│   ├── controllers/           # Route controllers for application logic
+│   ├── models/                # Database models and business data
+│   ├── services/              # Business logic services
+│   ├── middleware/            # Express middleware functions
+│   ├── routes/                # Route definitions
+│   ├── utils/                 # Utility functions
+│   ├── types/                 # TypeScript type definitions
+│   ├── config/                # Configuration files
+│   └── app.ts                 # Express app setup
+├── tests/                     # Test files
+├── package.json               # Project dependencies 
+├── tsconfig.json              # TypeScript configuration
+└── .env.example               # Environment variables example
+\`\`\`
+
+## Architecture Options
+
+The Node.js projects can be generated with various architectural patterns:
+
+- MVC Pattern: Traditional Model-View-Controller separation for web applications
+- Clean Architecture: Domain-centric approach with separated concerns
+- Layered Architecture: Separation into distinct horizontal layers
+        `
+      },
+      {
         id: 'frontend',
         title: 'Frontend Options',
         content: `
@@ -131,24 +178,24 @@ JetFrame.Dev allows you to include frontend frameworks in your project generatio
 
 ## Supported Frameworks
 
-- **React**: Generate projects with React for dynamic UIs
-- **Angular**: Create Angular-based frontends with TypeScript
-- **Vue.js**: Build projects using the progressive Vue.js framework
+- React: Generate projects with React for dynamic UIs
+- Angular: Create Angular-based frontends with TypeScript
+- Vue.js: Build projects using the progressive Vue.js framework
 
 ## Features
 
-- **TypeScript Support**: All frontend projects use TypeScript for type safety
-- **Routing Configuration**: Pre-configured routing for multi-page applications
-- **State Management**: Integrated state management appropriate for each framework
-- **API Integration**: Ready-to-use services for communicating with your backend
-- **Authentication UI**: Login, registration, and auth-protected routes
+- TypeScript Support: All frontend projects use TypeScript for type safety
+- Routing Configuration: Pre-configured routing for multi-page applications
+- State Management: Integrated state management appropriate for each framework
+- API Integration: Ready-to-use services for communicating with your backend
+- Authentication UI: Login, registration, and auth-protected routes
         `
       }
     ]
   },
   {
-    id: 'architecture',
-    title: 'Architecture Patterns',
+    id: 'architectures',
+    title: 'Architectures',
     icon: '🏛️',
     subsections: [
       {
@@ -161,100 +208,115 @@ JetFrame.Dev can generate projects following the Clean Architecture pattern, a s
 
 ## Core Principles
 
-1. **Independence of Frameworks**: The architecture doesn't depend on external libraries
-2. **Testability**: Business rules can be tested without UI, database, or external elements
-3. **Independence of UI**: The UI can change without affecting the business rules
-4. **Independence of Database**: The database can be swapped without changing business rules
-5. **Independence of External Agencies**: Business rules don't know about external interfaces
+1. Independence of Frameworks: The architecture doesn't depend on external libraries
+2. Testability: Business rules can be tested without UI, database, or external elements
+3. Independence of UI: The UI can change without affecting the business rules
+4. Independence of Database: The database can be swapped without changing business rules
+5. Independence of External Agencies: Business rules don't know about external interfaces
 
 ## Architecture Layers
 
-- **Domain Layer**: Contains enterprise-wide business rules and entities
-- **Application Layer**: Contains application-specific business rules
-- **Infrastructure Layer**: Contains adapters to external systems and frameworks
-- **Presentation Layer**: Contains UI components and controllers
+- Domain Layer: Contains enterprise-wide business rules and entities
+- Application Layer: Contains application-specific business rules
+- Infrastructure Layer: Contains adapters to external systems and frameworks
+- Presentation Layer: Contains UI components and controllers
+
+## Supported Patterns Within Clean Architecture
+
+- Repository Pattern: Abstracts data access logic
+- CQRS: Separates read and write operations
+- Mediator Pattern: Using MediatR for handling commands and queries
+- Unit of Work: Managing transactions across multiple repositories
 
 ## Benefits
 
-- **Maintainable**: Easier to maintain as the project grows
-- **Testable**: Facilitates testing at all levels
-- **Flexible**: Allows changing external dependencies with minimal impact
+- Maintainable: Easier to maintain as the project grows
+- Testable: Facilitates testing at all levels
+- Flexible: Allows changing external dependencies with minimal impact
         `
       },
       {
-        id: 'cqrs',
-        title: 'CQRS Pattern',
+        id: 'hexagonal',
+        title: 'Hexagonal Architecture',
         content: `
-# Command Query Responsibility Segregation (CQRS)
+# Hexagonal Architecture (Ports and Adapters)
 
-JetFrame.Dev supports generating projects with the CQRS pattern, which separates read and write operations to optimize for different requirements.
+JetFrame.Dev supports the Hexagonal Architecture pattern, which isolates the core business logic from external concerns through ports and adapters.
 
 ## Core Concepts
 
-- **Commands**: Represent intentions to change state (write operations)
-- **Queries**: Represent requests for information (read operations)
-- **Command Handlers**: Process commands and produce state changes
-- **Query Handlers**: Process queries and return results
+- Domain Core: Contains the business logic isolated from external dependencies
+- Ports: Define interfaces for communication with the domain
+- Adapters: Implement the ports for specific technologies
 
-## Implementation
+## Architecture Components
 
-The generated project will include:
+- Primary/Driving Adapters: Components that drive the application (e.g., API controllers, UI)
+- Secondary/Driven Adapters: Components that the application drives (e.g., database, external services)
+- Ports: Interfaces that define how the domain interacts with the outside world
 
-- **Command Bus**: Routes commands to appropriate handlers
-- **Query Bus**: Routes queries to appropriate handlers
-- **Validation Pipeline**: Validates commands before handling
-- **Command/Query DTOs**: Data transfer objects for each operation
+## Implementation Details
 
-## Benefits
-
-- **Scalability**: Read and write operations can be scaled independently
-- **Performance**: Read models can be optimized for specific queries
-- **Simplicity**: Simpler specialized models vs. complex general models
-- **Security**: Finer-grained control over operations
-        `
-      },
-      {
-        id: 'ddd',
-        title: 'Domain-Driven Design',
-        content: `
-# Domain-Driven Design (DDD)
-
-JetFrame.Dev can generate projects structured according to Domain-Driven Design principles, focusing on the core domain and domain logic.
-
-## Key Concepts
-
-- **Ubiquitous Language**: Shared language between developers and domain experts
-- **Bounded Contexts**: Clear boundaries between different domain models
-- **Entities**: Objects defined by their identity
-- **Value Objects**: Objects defined by their attributes
-- **Aggregates**: Clusters of entities and value objects with clear boundaries
-- **Domain Events**: Events that domain experts care about
-- **Repositories**: Methods for accessing domain objects
-
-## Project Structure
-
-The generated project organizes code around the domain model:
+JetFrame.Dev generates a clear separation of concerns:
 
 \`\`\`
 YourProject/
-├── Domain/
-│   ├── Entities/           # Domain entities
-│   ├── ValueObjects/       # Value objects
-│   ├── Aggregates/         # Aggregate roots
-│   ├── Events/             # Domain events
-│   ├── Exceptions/         # Domain exceptions
-│   └── Services/           # Domain services
-├── Application/            # Application services, DTOs
-├── Infrastructure/         # Technical infrastructure
-└── Presentation/           # UI and API controllers
+├── Domain/                  # Business logic and domain entities
+├── Application/             # Application services and ports definitions
+├── Adapters/
+│   ├── Primary/             # Input adapters (Web API, CLI, etc.)
+│   └── Secondary/           # Output adapters (DB, External Services)
+└── Infrastructure/          # Cross-cutting concerns
 \`\`\`
 
 ## Benefits
 
-- **Focus on Business Value**: Emphasis on business concepts
-- **Improved Communication**: Shared language between technical and business teams
-- **More Maintainable Code**: Organization around business domains
-- **Reduced Technical Debt**: Clearer model with precise boundaries
+- Technology Independence: Business logic is independent of delivery mechanisms
+- Testability: Easy to test the core logic in isolation
+- Flexibility: External components can be replaced with minimal impact
+- Focus on Domain: Places the focus on the business domain rather than technical details
+        `
+      },
+      {
+        id: 'layered',
+        title: 'Layered Architecture',
+        content: `
+# Layered Architecture
+
+JetFrame.Dev can generate projects with a traditional Layered Architecture, organizing code into distinct horizontal layers with specific responsibilities.
+
+## Key Layers
+
+- Presentation Layer: Handles user interactions and display
+- Business Logic Layer: Contains application's business rules
+- Data Access Layer: Manages data persistence and retrieval
+- Infrastructure Layer: Provides cross-cutting functionality
+
+## Implementation 
+
+The generated layered architecture includes:
+
+\`\`\`
+YourProject/
+├── Presentation/           # Controllers, Views, ViewModels
+├── Business/               # Services, Business Logic
+├── DataAccess/             # Repositories, Data Context
+└── Infrastructure/         # Logging, Authentication, etc.
+\`\`\`
+
+## Patterns Within Layered Architecture
+
+- Repository Pattern: For data access abstraction
+- Service Layer Pattern: Defining service interfaces for business operations
+- DTO Pattern: For data transfer between layers
+- Facade Pattern: Simplifying complex subsystems
+
+## Benefits
+
+- Separation of Concerns: Each layer has a specific responsibility
+- Easy to Understand: Straightforward organization that's familiar to many developers
+- Maintainability: Changes to one layer have minimal impact on others
+- Testability: Each layer can be tested independently
         `
       }
     ]
@@ -274,20 +336,20 @@ JetFrame.Dev provides seamless integration with Microsoft SQL Server for your ge
 
 ## Features
 
-- **Entity Framework Core Configuration**: Pre-configured EF Core for SQL Server
-- **Migration Setup**: Ready-to-use migration configuration
-- **Connection String Management**: Secure management of connection strings
-- **Repository Pattern**: Implemented repositories for data access
-- **Seeding Data**: Option to include seed data for development
+- Entity Framework Core Configuration: Pre-configured EF Core for SQL Server
+- Migration Setup: Ready-to-use migration configuration
+- Connection String Management: Secure management of connection strings
+- Repository Pattern: Implemented repositories for data access
+- Seeding Data: Option to include seed data for development
 
 ## Configuration
 
 The generated project includes:
 
-- **DbContext**: Properly configured DbContext classes
-- **Migrations**: Initial migration to set up your database schema
-- **Repository Classes**: Data access through the repository pattern
-- **Unit of Work**: Transaction management with Unit of Work pattern
+- DbContext: Properly configured DbContext classes
+- Migrations: Initial migration to set up your database schema
+- Repository Classes: Data access through the repository pattern
+- Unit of Work: Transaction management with Unit of Work pattern
         `
       },
       {
@@ -300,11 +362,11 @@ JetFrame.Dev supports PostgreSQL integration for projects requiring an open-sour
 
 ## Features
 
-- **Npgsql Provider**: Configured with the Npgsql provider for .NET
-- **Repository Implementation**: Data access through repositories
-- **Migration Support**: Database migration configuration
-- **JSON Data Type Support**: Utilize PostgreSQL's JSON capabilities
-- **Full-Text Search**: Configuration for PostgreSQL's full-text search
+- Npgsql Provider: Configured with the Npgsql provider for .NET
+- Repository Implementation: Data access through repositories
+- Migration Support: Database migration configuration
+- JSON Data Type Support: Utilize PostgreSQL's JSON capabilities
+- Full-Text Search: Configuration for PostgreSQL's full-text search
 
 ## .NET Integration
 
@@ -332,20 +394,20 @@ JetFrame.Dev provides support for MongoDB integration when you need a NoSQL docu
 
 ## Features
 
-- **MongoDB Driver Configuration**: Pre-configured MongoDB driver
-- **Repository Pattern**: MongoDB-specific repository implementations
-- **Document Mapping**: Entity to document mapping setup
-- **Indexing**: Configuration for MongoDB indexes
-- **Connection Management**: Secure connection handling
+- MongoDB Driver Configuration: Pre-configured MongoDB driver
+- Repository Pattern: MongoDB-specific repository implementations
+- Document Mapping: Entity to document mapping setup
+- Indexing: Configuration for MongoDB indexes
+- Connection Management: Secure connection handling
 
 ## Implementation Details
 
 The generated project includes:
 
-- **MongoDB Context**: A service to manage MongoDB connections
-- **Document Classes**: POCO classes representing MongoDB documents
-- **Repository Classes**: MongoDB-specific repository implementations
-- **Configuration**: MongoDB connection string and options management
+- MongoDB Context: A service to manage MongoDB connections
+- Document Classes: POCO classes representing MongoDB documents
+- Repository Classes: MongoDB-specific repository implementations
+- Configuration: MongoDB connection string and options management
 
 ## Sample Usage
 
@@ -376,11 +438,11 @@ JetFrame.Dev generated projects include Docker support for containerized deploym
 
 ## Features
 
-- **Dockerfile**: Properly configured Dockerfile for your application
-- **Docker Compose**: Docker Compose configuration for multi-container setup
-- **Environment Variables**: Configuration through environment variables
-- **Volume Mapping**: Proper volume configuration for persistent data
-- **Network Configuration**: Inter-container communication setup
+- Dockerfile: Properly configured Dockerfile for your application
+- Docker Compose: Docker Compose configuration for multi-container setup
+- Environment Variables: Configuration through environment variables
+- Volume Mapping: Proper volume configuration for persistent data
+- Network Configuration: Inter-container communication setup
 
 ## Docker Compose Configuration
 
@@ -435,17 +497,17 @@ JetFrame.Dev generated projects include configuration files for Continuous Integ
 
 ## Supported Platforms
 
-- **GitHub Actions**: Workflow files for GitHub CI/CD
-- **Azure DevOps**: Pipeline configuration for Azure DevOps
-- **GitLab CI**: Configuration for GitLab CI/CD
+- GitHub Actions: Workflow files for GitHub CI/CD
+- Azure DevOps: Pipeline configuration for Azure DevOps
+- GitLab CI: Configuration for GitLab CI/CD
 
 ## Pipeline Features
 
-- **Build Automation**: Automatic builds on code changes
-- **Testing**: Automated test execution
-- **Code Quality**: Integration with code quality tools
-- **Containerization**: Docker image building and pushing
-- **Deployment**: Automated deployment to hosting environments
+- Build Automation: Automatic builds on code changes
+- Testing: Automated test execution
+- Code Quality: Integration with code quality tools
+- Containerization: Docker image building and pushing
+- Deployment: Automated deployment to hosting environments
 
 ## GitHub Actions Example
 
@@ -594,11 +656,43 @@ const DocumentationPage = () => {
       
       // Lists
       if (line.trim().startsWith('- ')) {
-        formattedContent.push(<li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-disc">{line.replace('- ', '')}</li>);
+        // Process the list item to make the first part bold
+        const content = line.replace('- ', '');
+        const colonIndex = content.indexOf(':');
+        
+        if (colonIndex > 0) {
+          const term = content.substring(0, colonIndex);
+          const description = content.substring(colonIndex + 1);
+          
+          formattedContent.push(
+            <li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-disc">
+              <span className="font-bold">{term}</span>:{description}
+            </li>
+          );
+        } else {
+          formattedContent.push(<li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-disc">{content}</li>);
+        }
         return;
       }
+      
+      // Numbered lists
       if (line.trim().match(/^\d+\. /)) {
-        formattedContent.push(<li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-decimal">{line.replace(/^\d+\. /, '')}</li>);
+        // Process the list item to make the first part bold
+        const content = line.replace(/^\d+\. /, '');
+        const colonIndex = content.indexOf(':');
+        
+        if (colonIndex > 0) {
+          const term = content.substring(0, colonIndex);
+          const description = content.substring(colonIndex + 1);
+          
+          formattedContent.push(
+            <li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-decimal">
+              <span className="font-bold">{term}</span>:{description}
+            </li>
+          );
+        } else {
+          formattedContent.push(<li key={`li-${index}`} className="ml-6 text-gray-300 mb-2 list-decimal">{content}</li>);
+        }
         return;
       }
       

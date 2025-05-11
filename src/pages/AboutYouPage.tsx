@@ -173,7 +173,12 @@ console.log(creativity.blockers.length);
             </div>
           </div>
           
-          <div className="flex justify-center">
+          <div className="flex justify-center flex-col items-center">
+            <div className="text-center mb-4">
+              <div className="text-5xl text-primary font-bold mb-2">100%</div>
+              <p className="text-xl text-white font-medium">Your Vision</p>
+              <p className="text-gray-400 mt-1">Without Compromise</p>
+            </div>
             <div className="relative w-full max-w-md aspect-square flex items-center justify-center">
               <div className="absolute inset-0 flex items-center justify-center animate-wing-spread">
                 <img 
@@ -181,11 +186,6 @@ console.log(creativity.blockers.length);
                   alt="JetFrame Wings" 
                   className="w-3/4 h-3/4 opacity-80" 
                 />
-              </div>
-              <div className="z-10 text-center p-6">
-                <div className="text-5xl text-primary font-bold mb-4">100%</div>
-                <p className="text-xl text-white font-medium">Your Vision</p>
-                <p className="text-gray-400 mt-2">Without Compromise</p>
               </div>
             </div>
           </div>
